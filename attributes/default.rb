@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-default[:rackspace][:fog_version] = nil
+default[:rackspace][:fog_version] = "1.10.1"
 default[:rackspace][:rackspace_username] = nil
 default[:rackspace][:rackspace_apikey] = nil
 default[:rackspace][:rackspace_auth_url] = "identity.api.rackspacecloud.com"
