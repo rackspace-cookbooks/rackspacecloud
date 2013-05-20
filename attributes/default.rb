@@ -17,9 +17,9 @@
 # limitations under the License.
 #
 
-default[:rackspace][:fog_version] = "1.10.1"
-default[:rackspace][:rackspace_username] = nil
-default[:rackspace][:rackspace_apikey] = nil
-default[:rackspace][:rackspace_auth_url] = "identity.api.rackspacecloud.com"
-default[:rackspace][:rackspace_auth_region] = "us"
-default[:rackspace][:packages] = ["libxml2", "libxml2-dev", "libxslt1-dev"]
+default[:rackspacecloud][:fog_version] = "1.10.1"
+default[:rackspacecloud][:rackspace_username] = nil
+default[:rackspacecloud][:rackspace_apikey] = nil
+default[:rackspacecloud][:rackspace_auth_url] = "identity.api.rackspacecloud.com"
+default[:rackspacecloud][:rackspace_auth_region] = "us"
+default[:rackspacecloud][:packages] = ["libxml2", "libxml2-dev", "libxslt1-dev"]
