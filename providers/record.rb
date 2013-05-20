@@ -77,6 +77,24 @@ action :update do
   end
 end
 
+action :delete do
+  zone = get_zone(new_resource.name)
+  existing_record = record_exists?(zone)
+  if existing_record
+    record = zone.records.get(existing_record)
+    begin
+      record.destroy
+    rescue Fog::DNS::Rackspace::CallbackError => error
+      raise "Could not delete DNS record: #{error}"
+    rescue Fog::Rackspace::Errors::BadRequest => error
+      raise "There was a problem deleting the DNS record: #{error}"
+    end
+    Chef::Log.info("Record #{new_resource.record} deleted for domain #{new_resource.name}")
+  else
+    Chef::Log.info("Cannot delete DNS record #{new_resource.name} - record does not exist.")
+  end
+end
+
 private
 
 def get_zone(name=nil)
