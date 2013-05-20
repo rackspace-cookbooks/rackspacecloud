@@ -41,10 +41,10 @@ module Opscode
          Chef::Log.info("No Rackspace Cloud databag found. Using attributes for credentials.")
        end
  
-       @apikey = creds['rackspace_api_key'] rescue node[:rackspace][:rackspace_api_key]
-       @username = creds['rackspace_username'] rescue node[:rackspace][:rackspace_username]
-       @auth_url = creds['rackspace_auth_url'] rescue node[:rackspace][:rackspace_auth_url]
-       @region = creds['rackspace_auth_region'] rescue node[:rackspace][:rackspace_auth_reqion]
+       @apikey = creds['rackspace_api_key'] rescue node[:rackspacecloud][:rackspace_api_key]
+       @username = creds['rackspace_username'] rescue node[:rackspacecloud][:rackspace_username]
+       @auth_url = creds['rackspace_auth_url'] rescue node[:rackspacecloud][:rackspace_auth_url]
+       @region = creds['rackspace_auth_region'] rescue node[:rackspacecloud][:rackspace_auth_reqion]
      end
 
   end

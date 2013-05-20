@@ -33,7 +33,7 @@ Provides add, modify, remove functionality for Rackspace Cloud DNS records. Exam
 Add an A record:
 
 ```ruby
-rackspace_record "chef.rackspace.com" do
+rackspacecloud_record "chef.rackspace.com" do
   record "n02.chef.rackspace.com"
   value "10.1.2.3"
   type "A"
@@ -44,7 +44,7 @@ end
 Add a CNAME:
 
 ```ruby
-rackspace_record "chef.rackspace.com" do
+rackspacecloud_record "chef.rackspace.com" do
   record "n02.chef.rackspace.com"
   value "api.chef.rackspace.com"
   type "CNAME"

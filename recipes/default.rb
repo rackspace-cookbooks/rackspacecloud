@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-node[:rackspace][:packages].each do |pkg|
+node[:rackspacecloud][:packages].each do |pkg|
   r = package pkg do
     action :nothing
   end
@@ -25,7 +25,7 @@ node[:rackspace][:packages].each do |pkg|
 end
 
 chef_gem "fog" do
-  version node[:rackspace][:fog_version]
+  version node[:rackspacecloud][:fog_version]
   action :install
 end
 
