@@ -1,19 +1,30 @@
 Description
 ===========
-This cookbook provides LWRP's to interact with Rackspace Cloud APIs.
+This cookbook provides libraries, resources and providers to configure and manage Rackspace Cloud objects using the Rackspace Cloud API.
 
-Supports
-========
-* Rackspace Cloud DNS
-* Rackspace Cloud Load Balancers (Coming Soon)
-* Rackspace Cloud Database (Coming Soon)
-* Rackspace Cloud Block Storage (Coming Soon)
-* Rackspace Cloud Servers (Coming Soon)
+Currently supported resources:
 
-Usage
-=====
-### Data Bags
-It is highly encouraged that you use an encrypted data bag to provide your Rackspace Cloud username and API key. To do so, make a data bag called ```rackspace``` with an item called ```cloud``` that has at least the following:
+* Rackspace Cloud DNS ( rackspacecloud_record )
+* Rackspace Cloud Files ( rackspacecloud_file )
+
+Coming soon:
+
+* Rackspace Cloud Load Balancers
+* Rackspace Cloud Database
+* Rackspace Cloud Block Storage
+* Rackspace Cloud Servers
+
+Requirements
+============
+
+Requires Chef 0.7.10 or higher for Lightweight Resource and Provider support. Chef 0.8+ is recommended. While this cookbook can be used in chef-solo mode, to gain the most flexibility, we recommend using chef-client with a Chef Server.
+
+A Rackspace Cloud account is required. The username and API key are used to authenticate with Rackspace Cloud.
+
+Rackspace Credentials
+=====================
+
+In order to manage Rackspace Cloud components, authentication credentials need to be available to the node. There are a number of ways to handle this, such as node attributes or roles. We recommend storing these in a databag item (Chef 0.8+), and loading them in the recipe where the resources are needed. To do so, make a data bag called ```rackspace``` with an item called ```cloud``` that has at least the following:
 
 ```json
 {
@@ -23,11 +34,56 @@ It is highly encouraged that you use an encrypted data bag to provide your Racks
 }
 ```
 
-You may choose to provide your ```rackspace_auth_url``` and ```rackspace_auth_region``` in the data bag as well, but they can generally be safely provided as attributes.
+You may choose to provide your ```rackspace_auth_url``` and ```rackspace_auth_region``` in the data bag item as well, but they can generally be safely provided as attributes.
 
-LWRPs
-=====
-## rackspace_record:
+The values can be loaded in a recipe with:
+
+```ruby
+rackspace = data_bag_item("rackspace", "cloud")
+```
+
+And to access the values:
+
+```ruby
+rackspace['rackspace_username']
+rackspace['rackspace_api_key']
+```
+
+The data bag items can also be encrypted for extra security.
+
+Recipes
+=======
+
+default.rb
+----------
+
+The default recipe installs the ```fog``` RubyGem, which this cookbook requires in order to work with the Rackspace API. Make sure that the default recipe is in the node or role ```run_list``` before any resources from this cookbook are used.
+
+"run_list": [
+  "recipe[rackspacecloud]"
+]
+
+The ```gem_package``` is created as a Ruby Object and thus installed during the compile phase of the Chef run.
+
+Libraries
+=========
+
+The cookbook has several library modules which can be included where necessary:
+
+```ruby
+Opscode::Rackspace
+Opscode::Rackspace::DNS
+Opscode::Rackspace::Storage
+```
+
+Resources and Providers
+=======================
+
+This cookbook provides several resources and corresponding providers.
+
+rackspacecloud_record
+---------------------
+
 Provides add, modify, remove functionality for Rackspace Cloud DNS records. Example:
 
 Add an A record:
@@ -71,12 +127,34 @@ end
 * ```ttl```: The TTL for the record. Default is ```300```.
 * ```action```: ```:add```, ```:delete```, ```:update```. Default is ```:add```.
 
+rackspacecloud_file
+-------------------
+
+Retrieves files from Rackspace Cloud Files. Example:
+
+```ruby
+rackspacecloud_file "/usr/share/tomcat5/webapps/demo.war" do
+  directory "wars"
+  rackspace_username "foo"
+  rackspace_api_key "nnnnnnnnnnn"
+  action :create
+end
+```
+
+### Attributes:
+* ```directory```: The directory on Rackspace Cloud Files where the file can be found.
+* ```rackspace_username```: The Rackspace API username. Can be retrieved from data bag or node attributes.
+* ```rackspace_api_key```: The Rackspace API key. Can be retrieved from data bag or node attributes.
+* ```action```: ```:create``` or ```:create_if_missing```. Default is ```:create```.
+
 License and Author
 ==================
 
 Author:: Ryan Walker (<ryan.walker@rackspace.com>)
+Author:: Julian Dunn (<jdunn@opscode.com>)
 
 Copyright 2013, Rackspace Hosting 
+Copyright 2013, Opscode, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
