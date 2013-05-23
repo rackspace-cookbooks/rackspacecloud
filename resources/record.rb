@@ -21,6 +21,10 @@
 actions :add, :delete, :update
 default_action :add
 
+attribute :rackspace_username, :kind_of => String, :required => true
+attribute :rackspace_api_key, :kind_of => String, :required => true
+attribute :rackspace_region, :kind_of => Symbol, :default => :dfw
+attribute :rackspace_auth_url, :kind_of => String
 attribute :name, :name_attribute => true, :kind_of => String, :required => true
 attribute :record, :kind_of => String, :required => true
 attribute :value, :kind_of => String, :required => true
