@@ -44,7 +44,7 @@ module Opscode
        @apikey = creds['rackspace_api_key'] rescue node[:rackspacecloud][:rackspace_api_key]
        @username = creds['rackspace_username'] rescue node[:rackspacecloud][:rackspace_username]
        @auth_url = creds['rackspace_auth_url'] rescue node[:rackspacecloud][:rackspace_auth_url]
-       @region = creds['rackspace_auth_region'] rescue node[:rackspacecloud][:rackspace_auth_reqion]
+       @region = creds['rackspace_auth_region'] rescue node[:rackspacecloud][:rackspace_auth_region]
      end
 
   end
