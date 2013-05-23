@@ -17,12 +17,7 @@
 # limitations under the License.
 #
 
-node[:rackspacecloud][:packages].each do |pkg|
-  r = package pkg do
-    action :nothing
-  end
-  r.run_action(:install)
-end
+include_recipe 'xml::ruby'
 
 chef_gem "fog" do
   version node[:rackspacecloud][:fog_version]
