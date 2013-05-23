@@ -94,6 +94,8 @@ rackspacecloud_record "chef.rackspace.com" do
   value "10.1.2.3"
   type "A"
   ttl 300
+  rackspace_username "foo"
+  rackspace_api_key "nnnnnnnnnnn"
   action :add
 end
 ```
@@ -105,6 +107,8 @@ rackspacecloud_record "chef.rackspace.com" do
   value "api.chef.rackspace.com"
   type "CNAME"
   ttl 300
+  rackspace_username "foo"
+  rackspace_api_key "nnnnnnnnnnn"
   action :add
 end
 ```
@@ -116,6 +120,8 @@ rackspacecloud_record "chef.rackspace.com" do
   value "10.1.2.4"
   type "A"
   ttl 300
+  rackspace_username "foo"
+  rackspace_api_key "nnnnnnnnnnn"
   action :update
 end
 ```
@@ -125,6 +131,8 @@ end
 * ```value```: The value to set the record to.
 * ```type```: The type of record to create. Default is ```A```.
 * ```ttl```: The TTL for the record. Default is ```300```.
+* ```rackspace_username```: The Rackspace API username. Can be retrieved from data bag or node attributes.
+* ```rackspace_api_key```: The Rackspace API key. Can be retrieved from data bag or node attributes.
 * ```action```: ```:add```, ```:delete```, ```:update```. Default is ```:add```.
 
 rackspacecloud_file
