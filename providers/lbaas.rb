@@ -68,7 +68,7 @@ end
 
 #add node to LB if it doesnt exist
 action :add_node do
-  converge_by("Adding #{new_resource.name} to cloud load balancer " ) do
+  converge_by("Adding node to cloud load balancer #{new_resource.load_balancer_id}" ) do
     #Check if LB exists
     lb_action{|lb_details|
       add_node if not lb_details['nodes'].any? {|node_data| (node_data['address'] == new_resource.node_address) }
@@ -78,7 +78,7 @@ end
 
 
 action :remove_node do
-  converge_by("Removing #{new_resource.name} from load balancer #{new_resource.load_balancer_id}") do
+  converge_by("Removing Node from cloud load balancer #{new_resource.load_balancer_id}") do
     lb_action{|lb_details|
       #Find Node id and remove it
       node_id = lb_details['nodes'].select{|node_data| node_data['address'] == new_resource.node_address}.map {|node_id| node_id['id']}.first
