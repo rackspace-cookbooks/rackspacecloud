@@ -155,11 +155,37 @@ end
 * ```rackspace_api_key```: The Rackspace API key. Can be retrieved from data bag or node attributes.
 * ```action```: ```:create``` or ```:create_if_missing```. Default is ```:create```.
 
+rackspacecloud_lbaas
+-------------------
+
+Adds and removes nodes from specified load balancer. Example:
+
+```ruby
+rackspacecloud_lbaas "loadBalancerIdGoesHere" do
+	action :add_node
+	rackspace_username "userName"
+	rackspace_api_key "apiKey"
+	node_address node[:rackspace][:local_ipv4]
+end
+```
+
+
+### Attributes:
+* ```load_balancer_id```: Id of the load balancer to add/remove nodes on.
+* ```port```: Port the load balancer will route traffic to. (default is 80)
+* ```node_address```: The IP address of the node you are adding or removing
+* ```condition```: Either ENABLED or DISABLED (default is enabled)
+* ```rackspace_username```: The Rackspace API username. Can be retrieved from data bag or node attributes.
+* ```rackspace_api_key```: The Rackspace API key. Can be retrieved from data bag or node attributes.
+* ```action```: ```:add_node``` or ```:remove_node```. Default is ```:add_node```.
+
 License and Author
 ==================
 
 Author:: Ryan Walker (<ryan.walker@rackspace.com>)
 Author:: Julian Dunn (<jdunn@opscode.com>)
+Author:: Zack Feldstein (<zack.feldstein@rackspace.com>)
+
 
 Copyright 2013, Rackspace Hosting 
 Copyright 2013, Opscode, Inc.
