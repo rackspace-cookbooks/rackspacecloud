@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-include_recipe 'xml::ruby'
+include_recipe 'xml::ruby' unless platform_family?("windows")
 
 chef_gem "fog" do
   version node[:rackspacecloud][:fog_version]
