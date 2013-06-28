@@ -43,6 +43,11 @@ end
 action :create do
 
   f = Tempfile.new('download')
+
+  if new_resource.binmode
+    f.binmode
+  end
+
   directory = get_directory(new_resource.directory)
   directory.files.get(::File.basename(new_resource.filename)) do |data, remaining, content_length|
     f.syswrite data
