@@ -145,6 +145,7 @@ rackspacecloud_file "/usr/share/tomcat5/webapps/demo.war" do
   directory "wars"
   rackspace_username "foo"
   rackspace_api_key "nnnnnnnnnnn"
+  binmode true
   action :create
 end
 ```
@@ -153,6 +154,7 @@ end
 * ```directory```: The directory on Rackspace Cloud Files where the file can be found.
 * ```rackspace_username```: The Rackspace API username. Can be retrieved from data bag or node attributes.
 * ```rackspace_api_key```: The Rackspace API key. Can be retrieved from data bag or node attributes.
+* ```binmode```: ```true``` or ```false```. Default is ```false```. Setting this to ```true``` will download the file in binary mode.
 * ```action```: ```:create``` or ```:create_if_missing```. Default is ```:create```.
 
 rackspacecloud_lbaas
@@ -184,6 +186,7 @@ License and Author
 
 Author:: Ryan Walker (<ryan.walker@rackspace.com>)
 Author:: Julian Dunn (<jdunn@opscode.com>)
+Author:: Michael Goetz (<mpgoetz@opscode.com>)
 Author:: Zack Feldstein (<zack.feldstein@rackspace.com>)
 
 
