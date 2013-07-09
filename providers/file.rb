@@ -51,7 +51,7 @@ action :create do
   new_resource.checksum = Chef::Digester.checksum_for_file(f.path)
   if !current_resource.exists || (current_resource.checksum != new_resource.checksum)
     converge_by("Moving new file with checksum to #{new_resource.filename}") do
-      FileUtils.mv(f.path, new_resource.filename)
+      move_file(f.path, new_resource.filename)
     end
   else
     f.unlink
@@ -69,4 +69,15 @@ private
 
 def get_directory(n)
   storage.directories.get(n)
+end
+
+# Defining custom method to work around EACCESS errors on Windows when attempting to move across devices.
+# Attrib to tknerr for workaround found in Berkshelf issue #140
+def move_file(src, dest)
+begin
+    FileUtils.mv(src, dest, force: false)
+  rescue Errno::EACCES
+    FileUtils.cp_r(src, dest)
+    FileUtils.rm_rf(src)
+  end
 end
