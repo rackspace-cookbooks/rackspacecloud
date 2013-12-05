@@ -70,6 +70,22 @@ action :create_if_missing do
   end
 end
 
+action :upload do
+  if current_resource.exists
+    # Use md5 checksums because CloudFiles etag is md5
+    new_resource.checksum = Chef::Digester.generate_md5_checksum_for_file(new_resource.filename)
+    directory = get_directory(new_resource.directory)
+    remote_file = directory.files.get(::File.basename(new_resource.filename))
+    if remote_file.nil? || remote_file.etag != new_resource.checksum
+      converge_by("Uploading new file #{::File.basename(new_resource.filename)} with
+       checksum #{new_resource.checksum} to #{new_resource.directory} container") do
+        directory.files.create :key => ::File.basename(new_resource.filename),
+                               :body => ::File.open(new_resource.filename)
+      end
+    end
+  end
+end
+
 private
 
 def get_directory(n)
