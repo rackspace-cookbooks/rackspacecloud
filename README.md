@@ -138,7 +138,7 @@ end
 rackspacecloud_file
 -------------------
 
-Retrieves files from Rackspace Cloud Files. Example:
+Retrieves/Stores files from/to Rackspace Cloud Files. Example:
 
 ```ruby
 rackspacecloud_file "/usr/share/tomcat5/webapps/demo.war" do
@@ -150,12 +150,22 @@ rackspacecloud_file "/usr/share/tomcat5/webapps/demo.war" do
 end
 ```
 
+```ruby
+rackspacecloud_file "/usr/share/tomcat5/webapps/demo.war" do
+  directory "wars"
+  rackspace_username "foo"
+  rackspace_api_key "nnnnnnnnnnn"
+  binmode true
+  action :upload
+end
+```
+
 ### Attributes:
-* ```directory```: The directory on Rackspace Cloud Files where the file can be found.
+* ```directory```: The directory on Rackspace Cloud Files where the file can be found or should be uploaded to.
 * ```rackspace_username```: The Rackspace API username. Can be retrieved from data bag or node attributes.
 * ```rackspace_api_key```: The Rackspace API key. Can be retrieved from data bag or node attributes.
 * ```binmode```: ```true``` or ```false```. Default is ```false```. Setting this to ```true``` will download the file in binary mode.
-* ```action```: ```:create``` or ```:create_if_missing```. Default is ```:create```.
+* ```action```: ```:create```, ```:create_if_missing```, ```:upload```. Default is ```:create```.
 
 rackspacecloud_lbaas
 -------------------
