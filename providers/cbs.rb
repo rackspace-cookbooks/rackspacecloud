@@ -91,6 +91,38 @@ action :detach_volume do
   end
 end
 
+action :delete_volume do
+  converge_by("Deleting cloud block storage volume") do
+    if @current_resource.exists
+      delete_volume()
+      @new_resource.updated_by_last_action(true)
+    else
+      Chef::Log.info(
+        "Cloud Block Storage volume '#{@current_resource.name}' does not exist, no action taken")
+    end
+    update_node_data
+  end
+end
+
+action :detach_and_delete do
+  converge_by("detaching cloud block storage volume from node and deleting volume") do
+    if @current_resource.attached
+      detach_volume()
+    else
+      Chef::Log.info(
+        "Cloud Block Storage volume '#{@current_resource.name}' not attached, no action taken")
+    end
+    if @current_resource.exists
+      delete_volume()
+      @new_resource.updated_by_last_action(true)
+    else
+      Chef::Log.info(
+        "Cloud Block Storage volume '#{@current_resource.name}' does not exist, no action taken")
+    end
+    update_node_data
+  end
+end
+
 private
 
 #locate the Fog::Compute::RackspaceV2::Server for this node by ip_address
@@ -113,7 +145,6 @@ def match_existing_volume
 end
 
 #Check the Fog::Compute::RackspaceV2::Server Attachments to see if the volume is alreay attached.
-#If not attached to this server
 def match_existing_attachment
   @current_resource.attached = false
   @current_resource.server.attachments.each do |attachment|
@@ -188,6 +219,25 @@ def detach_volume
   end
   @current_resource.attached = false
   @current_resource.device = nil
+end
+
+#Delete a Cloud Block Storage volume
+def delete_volume
+  #check the Fog::Rackspace::BlockStorage::Volume Attachments to make sure the
+  #volume is not attached to another server
+  unless @new_resource.volume_id.nil?
+    volume = cbs.volumes.get(@new_resource.volume_id)
+  else
+    volume = cbs.volumes.get(@current_resource.volume_id)
+  end
+  unless volume.attachments.empty?
+    raise "Volume #{volume.id} can not be deleted because it has active attachments"
+  end
+  
+  Chef::Log.info("Deleting volume #{volume.id}")
+  #attach the volume and wait until the volume status shows 'IN-USE'
+  volume.destroy
+  @current_resource.exists = false
 end
 
 #update node attributes to contain data for all volumes attached to this server
