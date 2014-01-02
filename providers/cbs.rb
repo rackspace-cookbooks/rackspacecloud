@@ -135,6 +135,13 @@ end
 #check the Fog::Rackspace::BlockStorage::Volumes to find an existing volume by name
 def match_existing_volume
   @current_resource.exists = false
+  unless @new_resource.volume_id.nil?
+    volume = cbs.volumes.get(@new_resource.volume_id)
+    @current_resource.exists = true
+    @current_resource.volume_id(volume.id)
+  else
+    volume = cbs.volumes.get(@current_resource.volume_id)
+  end
   cbs.volumes.each do |volume|
     if @current_resource.name == volume.display_name
       @current_resource.exists = true
