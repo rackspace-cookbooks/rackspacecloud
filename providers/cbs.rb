@@ -59,6 +59,25 @@ action :attach_volume do
   end
 end
 
+action :create_and_attach do
+  converge_by("Adding cloud block storage volume") do
+    unless @current_resource.exists
+      create_volume()
+    else
+      Chef::Log.info(
+        "Cloud Block Storage volume '#{@current_resource.name}' already exists, no action taken")
+    end
+    unless @current_resource.attached
+      attach_volume()
+      @new_resource.updated_by_last_action(true)
+    else
+      Chef::Log.info(
+        "Cloud Block Storage volume '#{@current_resource.name}' already attached, no action taken")
+    end
+    update_node_data
+  end
+end
+
 private
 
 #locate the Fog::Compute::RackspaceV2::Server for this node by ip_address
