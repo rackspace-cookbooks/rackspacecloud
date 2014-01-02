@@ -27,7 +27,7 @@ end
 #attached to the current server
 def load_current_resource
   @current_resource = Chef::Resource::RackspacecloudCbs.new(@new_resource.name) 
-  @current_resource.server = locate_server_by_ip()
+  @current_resource.server = locate_server()
   match_existing_volume()
   match_existing_attachment()
   @current_resource
@@ -42,6 +42,7 @@ action :create_volume do
       Chef::Log.info(
         "Cloud Block Storage volume '#{@current_resource.name}' already exists, no action taken")
     end
+    update_node_data
   end
 end
 
@@ -54,13 +55,14 @@ action :attach_volume do
       Chef::Log.info(
         "Cloud Block Storage volume '#{@current_resource.name}' already attached, no action taken")
     end
+    update_node_data
   end
 end
 
 private
 
 #locate the Fog::Compute::RackspaceV2::Server for this node by ip_address
-def locate_server_by_ip
+def locate_server
   compute.servers.select{
       |server| server.public_ip_address == "192.237.162.222"
   }[0]
@@ -129,4 +131,22 @@ def attach_volume
   end
   @current_resource.attached = true
   @current_resource.device = attachment.device
+end
+
+#update node attributes to contain data for all attached volumes
+def update_node_data
+  Chef::Log.info("updating node[:rackspacecloud][:cbs][:attached_volumes] with volume attachment information")
+  server_attachments =  (compute.list_attachments(@current_resource.server.id)).body["volumeAttachments"]
+  server_attachments.collect!{|attachment| attachment["volumeId"]}
+  attached_volumes = []
+  server_attachments.each do |volume_id|
+    volume = cbs.volumes.get(volume_id)
+    attached_volumes << {
+        :volume_id => volume.id,
+        :type => volume.volume_type,
+        :size => volume.size
+    }
+  end
+  node.set[:rackspacecloud][:cbs][:attached_volumes] = attached_volumes 
+  Chef::Log.info(attached_volumes) 
 end
