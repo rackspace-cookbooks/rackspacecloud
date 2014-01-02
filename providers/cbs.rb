@@ -47,7 +47,7 @@ action :create_volume do
 end
 
 action :attach_volume do
-  converge_by("Adding cloud block storage volume") do
+  converge_by("Attaching cloud block storage volume to node") do
     unless @current_resource.attached
       attach_volume()
       @new_resource.updated_by_last_action(true)
@@ -60,7 +60,7 @@ action :attach_volume do
 end
 
 action :create_and_attach do
-  converge_by("Adding cloud block storage volume") do
+  converge_by("Creating cloud block storage volume and attaching to node") do
     unless @current_resource.exists
       create_volume()
     else
@@ -73,6 +73,19 @@ action :create_and_attach do
     else
       Chef::Log.info(
         "Cloud Block Storage volume '#{@current_resource.name}' already attached, no action taken")
+    end
+    update_node_data
+  end
+end
+
+action :detach_volume do
+  converge_by("Detaching cloud block storage volume form server") do
+    if @current_resource.attached
+      detach_volume()
+      @new_resource.updated_by_last_action(true)
+    else
+      Chef::Log.info(
+        "Cloud Block Storage volume '#{@current_resource.name}' not attached, no action taken")
     end
     update_node_data
   end
@@ -150,9 +163,34 @@ def attach_volume
   end
   @current_resource.attached = true
   @current_resource.device = attachment.device
+  Chef::Log.info("Volume #{volume.id} attached at device #{attachment.device}")
 end
 
-#update node attributes to contain data for all attached volumes
+#detach a Cloud Block Storage volume from the current server
+def detach_volume
+  #check the Fog::Rackspace::BlockStorage::Volume Attachments to make sure the
+  #volume is not attached to another server
+  unless @new_resource.volume_id.nil?
+    volume = cbs.volumes.get(@new_resource.volume_id)
+  else
+    volume = cbs.volumes.get(@current_resource.volume_id)
+  end
+  attached_servers = volume.attachments.collect{|attachment| attachment["server_id"]}
+  unless attached_servers.include? @current_resource.server.id 
+    raise "Volume with id #{volume.id} exists but is attached to a different cloud server"
+  end
+  
+  Chef::Log.info("Detaching volume #{volume.id} from server #{@current_resource.server.id}")
+  #attach the volume and wait until the volume status shows 'IN-USE'
+  compute.delete_attachment(@current_resource.server.id,volume.id)
+  volume.wait_for(600)  do
+    volume.ready?
+  end
+  @current_resource.attached = false
+  @current_resource.device = nil
+end
+
+#update node attributes to contain data for all volumes attached to this server
 def update_node_data
   Chef::Log.info("updating node[:rackspacecloud][:cbs][:attached_volumes] with volume attachment information")
   server_attachments =  (compute.list_attachments(@current_resource.server.id)).body["volumeAttachments"]
@@ -162,7 +200,8 @@ def update_node_data
     volume = cbs.volumes.get(volume_id)
     attached_volumes << {
         :volume_id => volume.id,
-        :type => volume.volume_type,
+        :display_name => volume.display_name,
+        :volume_type => volume.volume_type,
         :size => volume.size
     }
   end

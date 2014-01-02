@@ -16,7 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-actions :create_volume, :attach_volume, :create_and_attach
+actions :create_volume, :attach_volume, :create_and_attach, :detach_volume
 default_action :create_and_attach
 
 attribute :rackspace_username, :kind_of => String, :required => true
