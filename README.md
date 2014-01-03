@@ -195,18 +195,23 @@ end
 rackspacecloud_cbs
 ---------------------
 
-Provides functionality to manage storage volumes and server attachments for Rackspace CloudBlock Storage including creating, attaching, detaching and deleting volumes.  All actions performed are idempotent.
+Provides functionality to manage storage volumes and server attachments for Rackspace Cloud Block Storage including creating, attaching, detaching and deleting volumes.  All actions performed are idempotent.
 
-Actions:
+### Actions:
 
-```:create_volume``` - Creates a new storage volume with the given name.  If a volume with the given name exists no action will be taken.
-```:attach_volume``` = Attaches an existing storage volume to the current node.  If the volume is already attached no action will be taken.  If the volme is attached to another server, an exception will be raised. Volumes may be attached by name or by volume_id. 
-```:create_and_attach``` - The default action.  Combines create_volume and attach_volume into one action.  This action doe snot accept volume_id as a parameter.
-```:detach_volume``` - Detaches a volume from an existing server.  If the given volume is not attached no action is performed.  If the volme is attached to another server, an exception will be raised.  Volume may be identified by name or volume_id.
-```:delete_volume``` - Deletes an existing storage volume.  A volume must be detached in order to be deleted.  If the given volume does not exist no action will be taken.  Volume may be identified by name or volume_id. 
+```:create_volume``` - Creates a new storage volume with the given name.  If a volume with the given name exists no action will be taken.  This action does not accept volume_id as a parameter.
+
+```:attach_volume``` - Attaches an existing storage volume to the current node.  If the volume is already attached no action will be taken.  If the volme is attached to another server, an exception will be raised. The volumes may be attached by name or by volume_id.
+
+```:create_and_attach``` - The default action.  Combines create_volume and attach_volume into one action.  This action does not accept volume_id as a parameter.
+
+```:detach_volume``` - Detaches a volume from an existing server.  If the given volume is not attached no action is performed.  If the volume is attached to another server, an exception will be raised.  The volume may be detached by name or volume_id.
+
+```:delete_volume``` - Deletes an existing storage volume.  A volume must be detached in order to be deleted.  If the given volume does not exist no action will be taken.  The volume may be identified by name or volume_id.
+
 ```:detach_and_delete``` - Combines detach_volume and delete_volume into a single action.  Volume may be identified by name or volume_id.
 
-Examples:
+### Examples:
 
 Create and attach a 100GB SSD storage volume:
 
@@ -260,7 +265,7 @@ end
 Detach and delete volume by id:
 
 ```ruby
-rackspacecloud_cbs "myvolume-02" do 
+rackspacecloud_cbs "myvolume-01" do 
   volume_id "74fe8714-fd92-4d07-a6a2-ddd15ed09f79" 
   rackspace_username "userName"
   rackspace_api_key "apiKey"
