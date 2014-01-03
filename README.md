@@ -6,12 +6,12 @@ Currently supported resources:
 
 * Rackspace Cloud DNS ( rackspacecloud_record )
 * Rackspace Cloud Files ( rackspacecloud_file )
+* Rackspace Cloud Block storage ( rackspacecloud_cbs )
 
 Coming soon:
 
 * Rackspace Cloud Load Balancers
 * Rackspace Cloud Database
-* Rackspace Cloud Block Storage
 * Rackspace Cloud Servers
 
 Requirements
@@ -72,6 +72,7 @@ The cookbook has several library modules which can be included where necessary:
 
 ```ruby
 Opscode::Rackspace
+Opscode::Rackspace::BlockStorage
 Opscode::Rackspace::DNS
 Opscode::Rackspace::Storage
 ```
@@ -181,7 +182,6 @@ rackspacecloud_lbaas "loadBalancerIdGoesHere" do
 end
 ```
 
-
 ### Attributes:
 * ```load_balancer_id```: Id of the load balancer to add/remove nodes on.
 * ```port```: Port the load balancer will route traffic to. (default is 80)
@@ -191,6 +191,94 @@ end
 * ```rackspace_api_key```: The Rackspace API key. Can be retrieved from data bag or node attributes.
 * ```action```: ```:add_node``` or ```:remove_node```. Default is ```:add_node```.
 
+
+rackspacecloud_cbs
+---------------------
+
+Provides functionality to manage storage volumes and server attachments for Rackspace CloudBlock Storage including creating, attaching, detaching and deleting volumes.  All actions performed are idempotent.
+
+Actions:
+
+```:create_volume``` - Creates a new storage volume with the given name.  If a volume with the given name exists no action will be taken.
+```:attach_volume``` = Attaches an existing storage volume to the current node.  If the volume is already attached no action will be taken.  If the volme is attached to another server, an exception will be raised. Volumes may be attached by name or by volume_id. 
+```:create_and_attach``` - The default action.  Combines create_volume and attach_volume into one action.  This action doe snot accept volume_id as a parameter.
+```:detach_volume``` - Detaches a volume from an existing server.  If the given volume is not attached no action is performed.  If the volme is attached to another server, an exception will be raised.  Volume may be identified by name or volume_id.
+```:delete_volume``` - Deletes an existing storage volume.  A volume must be detached in order to be deleted.  If the given volume does not exist no action will be taken.  Volume may be identified by name or volume_id. 
+```:detach_and_delete``` - Combines detach_volume and delete_volume into a single action.  Volume may be identified by name or volume_id.
+
+Examples:
+
+Create and attach a 100GB SSD storage volume:
+
+```ruby
+rackspacecloud_cbs "myvolume-01" do
+  type "SSD"
+  size 100
+  rackspace_username "userName"
+  rackspace_api_key "apiKey"
+  rackspace_region "ord"
+  action :create_and_attach
+end
+```
+
+Create a 200GB SATA volume:
+
+```ruby
+rackspacecloud_cbs "myvolume-02" do
+  type "SATA"
+  size 200    
+  rackspace_username "userName"
+  rackspace_api_key "apiKey"
+  rackspace_region "ord"
+  action :create_volume
+end
+```
+
+Attach a volume by volume_id:
+
+```ruby
+rackspacecloud_cbs "myvolume-02" do
+  volume_id "74fe8714-fd92-4d07-a6a2-ddd15ed09f79"    
+  rackspace_username "userName"
+  rackspace_api_key "apiKey"
+  rackspace_region "ord"
+  action :attach_volume
+end
+```
+
+Detach a volume by name:
+
+```ruby
+rackspacecloud_cbs "myvolume-02" do  
+  rackspace_username "userName"
+  rackspace_api_key "apiKey"
+  rackspace_region "ord"
+  action :detach_volume
+end
+```
+
+Detach and delete volume by id:
+
+```ruby
+rackspacecloud_cbs "myvolume-02" do 
+  volume_id "74fe8714-fd92-4d07-a6a2-ddd15ed09f79" 
+  rackspace_username "userName"
+  rackspace_api_key "apiKey"
+  rackspace_region "ord"
+  action :detach_volume
+end
+```
+
+### Attributes:
+* ```name```: Name of the volume to perform operations with.
+* ```volume_id```: The volume_id of the volume to attach, detach, or delete. This option is not valid for actions that create volumes.
+* ```type```: The type of storage device, either [SSD, SATA]. Default is SATA.
+* ```size```: The size in GB of strage device.  Default is 100.
+* ```rackspace_username```: The Rackspace API username. Can be retrieved from data bag or node attributes.
+* ```rackspace_api_key```: The Rackspace API key. Can be retrieved from data bag or node attributes.
+* ```action```: ```:create_volume```, ```:attach_volume```, ```:create_and_attach```, ```:detach_volume```, ```:delete_volume```, ```:detach_and_delete```. Default is ```:create_and_attach```.
+
+
 License and Author
 ==================
 
@@ -198,6 +286,7 @@ Author:: Ryan Walker (<ryan.walker@rackspace.com>)
 Author:: Julian Dunn (<jdunn@opscode.com>)
 Author:: Michael Goetz (<mpgoetz@opscode.com>)
 Author:: Zack Feldstein (<zack.feldstein@rackspace.com>)
+Author:: Steven Gonzales (<steven.gonzales@rackspace.com>)
 
 
 Copyright 2013, Rackspace Hosting 
