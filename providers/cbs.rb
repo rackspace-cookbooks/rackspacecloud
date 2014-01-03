@@ -125,11 +125,13 @@ end
 
 private
 
-#locate the Fog::Compute::RackspaceV2::Server for this node by ip_address
+#locate the Fog::Compute::RackspaceV2::Server by shelling out 
 def locate_server
-  compute.servers.select{
-      |server| server.public_ip_address == "192.237.162.222"
-  }[0]
+  server_id = `xenstore-read name`.sub("instance-","").strip
+  Chef::Log.info("Node matched to compute server #{server_id}")
+  server = compute.servers.get(server_id)
+  raise "unable to locate server in compute API" if server.nil?
+  server
 end
 
 #check the Fog::Rackspace::BlockStorage::Volumes to find an existing volume by name
