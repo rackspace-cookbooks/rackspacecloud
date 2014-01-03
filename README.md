@@ -270,7 +270,7 @@ rackspacecloud_cbs "myvolume-01" do
   rackspace_username "userName"
   rackspace_api_key "apiKey"
   rackspace_region "ord"
-  action :detach_volume
+  action :detach_and_delete
 end
 ```
 
