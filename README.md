@@ -282,17 +282,17 @@ During the provider run, a node attribute is updated with a list of hashes descr
 node[:rackspacecloud][:cbs][:attached_volumes] = [
   {
     :device => '/dev/xvde',
-    :size=>100,
-    :volume_id=>"4300a4b7-1b66-4d44-b18d-de1b3236b001",
-    :display_name=>"myvolume-01",
-    :volume_type =>"SSD"
+    :size => 100,
+    :volume_id => "4300a4b7-1b66-4d44-b18d-de1b3236b001",
+    :display_name => "myvolume-01",
+    :volume_type => "SSD"
   },
   {
-    :device =>"/dev/xvdb",
-    :size=>200,
-    :volume_id=>"642a8a7b-cb31-479b-8e4c-0158a2be3519",
-    :display_name=>"myvolume-02",
-    :volume_type =>"SATA"
+    :device => "/dev/xvdb",
+    :size => 200,
+    :volume_id => "642a8a7b-cb31-479b-8e4c-0158a2be3519",
+    :display_name => "myvolume-02",
+    :volume_type => "SATA"
   }
 ]
 ```
