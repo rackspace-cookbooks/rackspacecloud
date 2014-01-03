@@ -23,7 +23,7 @@ def whyrun_supported?
 end
 
 #override the load_current_resource method to set resource attributes 
-#indcating whether the #volume already exists and if the volume is 
+#indcating whether the volume already exists and if the volume is 
 #attached to the current server
 def load_current_resource
   @current_resource = Chef::Resource::RackspacecloudCbs.new(@new_resource.name) 
@@ -35,6 +35,8 @@ end
 
 action :create_volume do
   converge_by("Adding cloud block storage volume") do
+    #the volume_id parameter is only valid for attaching nodes, not for creating
+    raise "Cannot create a volume with a specific id (CBS chooses volume ids)" if @new_resource.volume_id
     unless @current_resource.exists
       create_volume()
       @new_resource.updated_by_last_action(true)
@@ -61,6 +63,8 @@ end
 
 action :create_and_attach do
   converge_by("Creating cloud block storage volume and attaching to node") do
+    #the volume_id parameter is only valid for attaching nodes, not for creating
+    raise "Cannot create a volume with a specific id (CBS chooses volume ids)" if @new_resource.volume_id
     unless @current_resource.exists
       create_volume()
     else
@@ -126,6 +130,7 @@ end
 private
 
 #locate the Fog::Compute::RackspaceV2::Server by shelling out 
+#and reading the id from xenstore
 def locate_server
   server_id = `xenstore-read name`.sub("instance-","").strip
   Chef::Log.info("Node matched to compute server #{server_id}")
@@ -134,26 +139,29 @@ def locate_server
   server
 end
 
-#check the Fog::Rackspace::BlockStorage::Volumes to find an existing volume by name
+#Match the recource by searching Fog::Rackspace::BlockStorage::Volumes
+#If the volume_id was given, attempt to match volume by volume_id, 
+#otherwise search volumes by name
 def match_existing_volume
-  @current_resource.exists = false
+  @current_resource.exists = false 
   unless @new_resource.volume_id.nil?
     volume = cbs.volumes.get(@new_resource.volume_id)
+    raise "volume with id #{@new_resource.volume_id} could not be found" if volume.nil?
     @current_resource.exists = true
     @current_resource.volume_id(volume.id)
   else
-    volume = cbs.volumes.get(@current_resource.volume_id)
-  end
-  cbs.volumes.each do |volume|
-    if @current_resource.name == volume.display_name
-      @current_resource.exists = true
-      @current_resource.volume_id(volume.id)
-      break
+    cbs.volumes.each do |volume|
+      if @current_resource.name == volume.display_name
+        @current_resource.exists = true
+        @current_resource.volume_id(volume.id)
+        break
+      end
     end
-  end
+  end 
 end
 
-#Check the Fog::Compute::RackspaceV2::Server Attachments to see if the volume is alreay attached.
+#Check the Fog::Compute::RackspaceV2::Server Attachments to see 
+#if the volume is alreay attached.
 def match_existing_attachment
   @current_resource.attached = false
   @current_resource.server.attachments.each do |attachment|
@@ -161,7 +169,6 @@ def match_existing_attachment
     #it is already attached to the server
     if attachment.volume_id == @current_resource.volume_id
       @current_resource.attached = true
-      @current_resource.device = attachment.device
     end
   end
   
@@ -196,13 +203,14 @@ def attach_volume
   end
   
   Chef::Log.info("Attaching volume #{volume.id} to server #{@current_resource.server.id}")
-  #attach the volume and wait until the volume status shows 'IN-USE'
+  
+  #attach the volume and poll until the volume status shows 'IN-USE'
   attachment = @current_resource.server.attach_volume(volume.id)
   volume.wait_for(600)  do
     volume.attached?
   end
+  #update the status of the resource
   @current_resource.attached = true
-  @current_resource.device = attachment.device
   Chef::Log.info("Volume #{volume.id} attached at device #{attachment.device}")
 end
 
@@ -227,7 +235,6 @@ def detach_volume
     volume.ready?
   end
   @current_resource.attached = false
-  @current_resource.device = nil
 end
 
 #Delete a Cloud Block Storage volume
@@ -253,15 +260,15 @@ end
 def update_node_data
   Chef::Log.info("updating node[:rackspacecloud][:cbs][:attached_volumes] with volume attachment information")
   server_attachments =  (compute.list_attachments(@current_resource.server.id)).body["volumeAttachments"]
-  server_attachments.collect!{|attachment| attachment["volumeId"]}
   attached_volumes = []
-  server_attachments.each do |volume_id|
-    volume = cbs.volumes.get(volume_id)
+  server_attachments.each do |attachment|
+    volume = cbs.volumes.get(attachment["volumeId"])
     attached_volumes << {
         :volume_id => volume.id,
         :display_name => volume.display_name,
         :volume_type => volume.volume_type,
-        :size => volume.size
+        :size => volume.size,
+        :device => attachment["device"]
     }
   end
   node.set[:rackspacecloud][:cbs][:attached_volumes] = attached_volumes 

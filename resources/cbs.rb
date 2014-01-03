@@ -29,4 +29,4 @@ attribute :type, :kind_of => String, :default => "SATA", :equal_to => ['SATA', '
 attribute :size, :kind_of => Integer,  :default => 100, :required => true
 attribute :volume_id, :kind_of => String, :required => false
 
-attr_accessor :server, :exists, :attached, :device
+attr_accessor :server, :exists, :attached
