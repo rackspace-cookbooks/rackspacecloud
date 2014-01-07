@@ -297,9 +297,9 @@ node[:rackspacecloud][:cbs][:attached_volumes] = [
 ]
 ```
 
-### Example Recipe with LVM
+### Example Recipe with LVM:
 
-Below is an example of a simple recipe that creates 2 100GB cloud block storage volumes and uses LVM to create a logical volume group, format them, and mount them at /var/log.  This example uses the [Opscode LVM recipe](https://github.com/opscode-cookbooks/lvm)
+Below is an example of a simple recipe that creates 2 100GB cloud block storage volumes and uses LVM to create a logical volume group, format the filesystem, and mount at /var/log.  This example uses the [Opscode LVM recipe](https://github.com/opscode-cookbooks/lvm).
 
 ```ruby
 include_recipe 'rackspacecloud'
