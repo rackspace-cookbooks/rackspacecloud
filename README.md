@@ -7,12 +7,16 @@ Currently supported resources:
 * Rackspace Cloud DNS ( rackspacecloud_record )
 * Rackspace Cloud Files ( rackspacecloud_file )
 * Rackspace Cloud Block storage ( rackspacecloud_cbs )
+* Rackspace Cloud Load Balancers ( rackspacecloud_lbaas)
 
 Coming soon:
 
-* Rackspace Cloud Load Balancers
 * Rackspace Cloud Database
 * Rackspace Cloud Servers
+
+Not Included:
+
+* Rackspace Cloud Monitoring: See [cookbook-cloudmonitoring](https://github.com/rackspace-cookbooks/cookbook-cloudmonitoring)
 
 Requirements
 ============
