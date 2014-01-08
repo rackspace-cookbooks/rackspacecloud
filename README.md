@@ -297,6 +297,41 @@ node[:rackspacecloud][:cbs][:attached_volumes] = [
 ]
 ```
 
+### Example Recipe with LVM:
+
+Below is an example of a simple recipe that creates 2 100GB cloud block storage volumes and uses LVM to create a logical volume group, format the filesystem, and mount at /var/log.  This example uses the [Opscode LVM recipe](https://github.com/opscode-cookbooks/lvm).
+
+```ruby
+include_recipe 'rackspacecloud'
+include_recipe 'lvm'
+
+rackspace = data_bag_item("rackspace", "cloud")
+rackspace_username = rackspace["rackspace_username"]
+rackspace_api_key = rackspace["rackspace_api_key"]
+
+(1..2).each do |vol_number|
+  rackspacecloud_cbs "#{node[:hostname]}-#{vol_number}" do
+    type "SATA"
+    size 100
+    rackspace_username rackspace_username
+    rackspace_api_key rackspace_api_key
+    rackspace_region "#{node[:rackspace][:cloud][:region]}"
+    action :create_and_attach
+  end
+end
+
+#use lazy attribute evaluation to get attachment data at execution time
+lvm_volume_group 'vg00' do
+  not_if {node[:rackspacecloud][:cbs][:attached_volumes].empty? }
+  physical_volumes lazy {node[:rackspacecloud][:cbs][:attached_volumes].collect{|attachment| attachment["device"]}}
+  logical_volume 'blockstorage' do
+    size        '100%VG'
+    filesystem  'ext4'
+    mount_point '/var/log'
+  end
+ end
+```
+
 ### Attributes:
 * ```name```: Name of the volume to perform operations with.
 * ```volume_id```: The volume_id of the volume to attach, detach, or delete. This option is not valid for actions that create volumes.
