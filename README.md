@@ -6,13 +6,17 @@ Currently supported resources:
 
 * Rackspace Cloud DNS ( rackspacecloud_record )
 * Rackspace Cloud Files ( rackspacecloud_file )
+* Rackspace Cloud Block storage ( rackspacecloud_cbs )
+* Rackspace Cloud Load Balancers ( rackspacecloud_lbaas)
 
 Coming soon:
 
-* Rackspace Cloud Load Balancers
 * Rackspace Cloud Database
-* Rackspace Cloud Block Storage
 * Rackspace Cloud Servers
+
+Not Included:
+
+* Rackspace Cloud Monitoring: See [cookbook-cloudmonitoring](https://github.com/rackspace-cookbooks/cookbook-cloudmonitoring)
 
 Requirements
 ============
@@ -72,6 +76,7 @@ The cookbook has several library modules which can be included where necessary:
 
 ```ruby
 Opscode::Rackspace
+Opscode::Rackspace::BlockStorage
 Opscode::Rackspace::DNS
 Opscode::Rackspace::Storage
 ```
@@ -138,7 +143,7 @@ end
 rackspacecloud_file
 -------------------
 
-Retrieves files from Rackspace Cloud Files. Example:
+Retrieves/Stores files from/to Rackspace Cloud Files. Example:
 
 ```ruby
 rackspacecloud_file "/usr/share/tomcat5/webapps/demo.war" do
@@ -150,12 +155,22 @@ rackspacecloud_file "/usr/share/tomcat5/webapps/demo.war" do
 end
 ```
 
+```ruby
+rackspacecloud_file "/usr/share/tomcat5/webapps/demo.war" do
+  directory "wars"
+  rackspace_username "foo"
+  rackspace_api_key "nnnnnnnnnnn"
+  binmode true
+  action :upload
+end
+```
+
 ### Attributes:
-* ```directory```: The directory on Rackspace Cloud Files where the file can be found.
+* ```directory```: The directory on Rackspace Cloud Files where the file can be found or should be uploaded to.
 * ```rackspace_username```: The Rackspace API username. Can be retrieved from data bag or node attributes.
 * ```rackspace_api_key```: The Rackspace API key. Can be retrieved from data bag or node attributes.
 * ```binmode```: ```true``` or ```false```. Default is ```false```. Setting this to ```true``` will download the file in binary mode.
-* ```action```: ```:create``` or ```:create_if_missing```. Default is ```:create```.
+* ```action```: ```:create```, ```:create_if_missing```, ```:upload```. Default is ```:create```.
 
 rackspacecloud_lbaas
 -------------------
@@ -171,7 +186,6 @@ rackspacecloud_lbaas "loadBalancerIdGoesHere" do
 end
 ```
 
-
 ### Attributes:
 * ```load_balancer_id```: Id of the load balancer to add/remove nodes on.
 * ```port```: Port the load balancer will route traffic to. (default is 80)
@@ -181,6 +195,157 @@ end
 * ```rackspace_api_key```: The Rackspace API key. Can be retrieved from data bag or node attributes.
 * ```action```: ```:add_node``` or ```:remove_node```. Default is ```:add_node```.
 
+
+rackspacecloud_cbs
+---------------------
+
+Provides functionality to manage storage volumes and server attachments for Rackspace Cloud Block Storage including creating, attaching, detaching and deleting volumes.  All actions performed are idempotent.
+
+### Actions:
+
+```:create_volume``` - Creates a new storage volume with the given name.  If a volume with the given name exists no action will be taken.  This action does not accept volume_id as a parameter.
+
+```:attach_volume``` - Attaches an existing storage volume to the current node.  If the volume is already attached no action will be taken.  If the volme is attached to another server, an exception will be raised. The volumes may be attached by name or by volume_id.
+
+```:create_and_attach``` - The default action.  Combines create_volume and attach_volume into one action.  This action does not accept volume_id as a parameter.
+
+```:detach_volume``` - Detaches a volume from an existing server.  If the given volume is not attached no action is performed.  If the volume is attached to another server, an exception will be raised.  The volume may be detached by name or volume_id.
+
+```:delete_volume``` - Deletes an existing storage volume.  A volume must be detached in order to be deleted.  If the given volume does not exist no action will be taken.  The volume may be identified by name or volume_id.
+
+```:detach_and_delete``` - Combines detach_volume and delete_volume into a single action.  Volume may be identified by name or volume_id.
+
+### Examples:
+
+Create and attach a 100GB SSD storage volume:
+
+```ruby
+rackspacecloud_cbs "myvolume-01" do
+  type "SSD"
+  size 100
+  rackspace_username "userName"
+  rackspace_api_key "apiKey"
+  rackspace_region "ord"
+  action :create_and_attach
+end
+```
+
+Create a 200GB SATA volume:
+
+```ruby
+rackspacecloud_cbs "myvolume-02" do
+  type "SATA"
+  size 200    
+  rackspace_username "userName"
+  rackspace_api_key "apiKey"
+  rackspace_region "ord"
+  action :create_volume
+end
+```
+
+Attach a volume by volume_id:
+
+```ruby
+rackspacecloud_cbs "myvolume-02" do
+  volume_id "74fe8714-fd92-4d07-a6a2-ddd15ed09f79"    
+  rackspace_username "userName"
+  rackspace_api_key "apiKey"
+  rackspace_region "ord"
+  action :attach_volume
+end
+```
+
+Detach a volume by name:
+
+```ruby
+rackspacecloud_cbs "myvolume-02" do  
+  rackspace_username "userName"
+  rackspace_api_key "apiKey"
+  rackspace_region "ord"
+  action :detach_volume
+end
+```
+
+Detach and delete volume by id:
+
+```ruby
+rackspacecloud_cbs "myvolume-01" do 
+  volume_id "74fe8714-fd92-4d07-a6a2-ddd15ed09f79" 
+  rackspace_username "userName"
+  rackspace_api_key "apiKey"
+  rackspace_region "ord"
+  action :detach_and_delete
+end
+```
+
+### Node Attributes:
+
+During the provider run, a node attribute is updated with a list of hashes describing the attached volumes.  The list of attached volumes is pulled from the compute and storage api so it will include all attached volumes whether created with this recipe or not.  The data is in the following format:
+
+```ruby
+node[:rackspacecloud][:cbs][:attached_volumes] = [
+  {
+    :device => '/dev/xvde',
+    :size => 100,
+    :volume_id => "4300a4b7-1b66-4d44-b18d-de1b3236b001",
+    :display_name => "myvolume-01",
+    :volume_type => "SSD"
+  },
+  {
+    :device => "/dev/xvdb",
+    :size => 200,
+    :volume_id => "642a8a7b-cb31-479b-8e4c-0158a2be3519",
+    :display_name => "myvolume-02",
+    :volume_type => "SATA"
+  }
+]
+```
+
+### Example Recipe with LVM:
+
+Below is an example of a simple recipe that creates 2 100GB cloud block storage volumes and uses LVM to create a logical volume group, format the filesystem, and mount at /var/log.  This example uses the [Opscode LVM recipe](https://github.com/opscode-cookbooks/lvm).
+
+```ruby
+include_recipe 'rackspacecloud'
+include_recipe 'lvm'
+
+rackspace = data_bag_item("rackspace", "cloud")
+rackspace_username = rackspace["rackspace_username"]
+rackspace_api_key = rackspace["rackspace_api_key"]
+
+(1..2).each do |vol_number|
+  rackspacecloud_cbs "#{node[:hostname]}-#{vol_number}" do
+    type "SATA"
+    size 100
+    rackspace_username rackspace_username
+    rackspace_api_key rackspace_api_key
+    rackspace_region "#{node[:rackspace][:cloud][:region]}"
+    action :create_and_attach
+  end
+end
+
+#use lazy attribute evaluation to get attachment data at execution time
+lvm_volume_group 'vg00' do
+  not_if {node[:rackspacecloud][:cbs][:attached_volumes].empty? }
+  physical_volumes lazy {node[:rackspacecloud][:cbs][:attached_volumes].collect{|attachment| attachment["device"]}}
+  logical_volume 'blockstorage' do
+    size        '100%VG'
+    filesystem  'ext4'
+    mount_point '/var/log'
+  end
+ end
+```
+
+### Attributes:
+* ```name```: Name of the volume to perform operations with.
+* ```volume_id```: The volume_id of the volume to attach, detach, or delete. This option is not valid for actions that create volumes.
+* ```type```: The type of storage device, either [SSD, SATA]. Default is SATA.
+* ```size```: The size in GB of strage device.  Default is 100.
+* ```rackspace_username```: The Rackspace API username. Can be retrieved from data bag or node attributes.
+* ```rackspace_api_key```: The Rackspace API key. Can be retrieved from data bag or node attributes.
+* ```action```: ```:create_volume```, ```:attach_volume```, ```:create_and_attach```, ```:detach_volume```, ```:delete_volume```, ```:detach_and_delete```. Default is ```:create_and_attach```.
+
+
 License and Author
 ==================
 
@@ -188,6 +353,7 @@ Author:: Ryan Walker (<ryan.walker@rackspace.com>)
 Author:: Julian Dunn (<jdunn@opscode.com>)
 Author:: Michael Goetz (<mpgoetz@opscode.com>)
 Author:: Zack Feldstein (<zack.feldstein@rackspace.com>)
+Author:: Steven Gonzales (<steven.gonzales@rackspace.com>)
 
 
 Copyright 2013, Rackspace Hosting 

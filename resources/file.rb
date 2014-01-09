@@ -18,7 +18,7 @@
 # limitations under the License.
 #
 
-actions :create, :create_if_missing
+actions :create, :create_if_missing, :upload
 
 default_action :create
 
