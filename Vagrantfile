@@ -15,11 +15,10 @@ Vagrant.configure("2") do |config|
   config.berkshelf.enabled = true
   config.vm.provision :chef_solo do |chef|
     chef.log_level = :debug
-    chef.cookbooks_path = ["vagrant/cookbooks"]
     chef.add_recipe "rackspacecloud"
     chef.json = {
        "rackspacecloud" => {
-         "fog_version" => "1.10.1"
+         "fog_version" => "1.21.0"
        }
     }
   end
