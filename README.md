@@ -150,6 +150,7 @@ rackspacecloud_file "/usr/share/tomcat5/webapps/demo.war" do
   directory "wars"
   rackspace_username "foo"
   rackspace_api_key "nnnnnnnnnnn"
+  rackspace_region "ORD"
   binmode true
   action :create
 end
@@ -160,6 +161,7 @@ rackspacecloud_file "/usr/share/tomcat5/webapps/demo.war" do
   directory "wars"
   rackspace_username "foo"
   rackspace_api_key "nnnnnnnnnnn"
+  rackspace_region "ORD"
   binmode true
   action :upload
 end
@@ -169,6 +171,7 @@ end
 * ```directory```: The directory on Rackspace Cloud Files where the file can be found or should be uploaded to.
 * ```rackspace_username```: The Rackspace API username. Can be retrieved from data bag or node attributes.
 * ```rackspace_api_key```: The Rackspace API key. Can be retrieved from data bag or node attributes.
+* ```rackspace_region```: The Rackspace Cloud Files region (ORD, DFW, HKG, IAD, etc.)
 * ```binmode```: ```true``` or ```false```. Default is ```false```. Setting this to ```true``` will download the file in binary mode.
 * ```action```: ```:create```, ```:create_if_missing```, ```:upload```. Default is ```:create```.
 
@@ -179,10 +182,11 @@ Adds and removes nodes from specified load balancer. Example:
 
 ```ruby
 rackspacecloud_lbaas "loadBalancerIdGoesHere" do
-	action :add_node
-	rackspace_username "userName"
-	rackspace_api_key "apiKey"
-	node_address node[:rackspace][:local_ipv4]
+  action :add_node
+  rackspace_username "userName"
+  rackspace_api_key "apiKey"
+  rackspace_region "ORD"
+  node_address node[:rackspace][:local_ipv4]
 end
 ```
 
@@ -193,6 +197,7 @@ end
 * ```condition```: Either ENABLED or DISABLED (default is enabled)
 * ```rackspace_username```: The Rackspace API username. Can be retrieved from data bag or node attributes.
 * ```rackspace_api_key```: The Rackspace API key. Can be retrieved from data bag or node attributes.
+* ```rackspace_region```: Region for load balancer (ORD, DFW, HKG, IAD, etc.)
 * ```action```: ```:add_node``` or ```:remove_node```. Default is ```:add_node```.
 
 
@@ -235,7 +240,7 @@ Create a 200GB SATA volume:
 ```ruby
 rackspacecloud_cbs "myvolume-02" do
   type "SATA"
-  size 200    
+  size 200
   rackspace_username "userName"
   rackspace_api_key "apiKey"
   rackspace_region "ord"
@@ -247,7 +252,7 @@ Attach a volume by volume_id:
 
 ```ruby
 rackspacecloud_cbs "myvolume-02" do
-  volume_id "74fe8714-fd92-4d07-a6a2-ddd15ed09f79"    
+  volume_id "74fe8714-fd92-4d07-a6a2-ddd15ed09f79"
   rackspace_username "userName"
   rackspace_api_key "apiKey"
   rackspace_region "ord"
@@ -269,8 +274,8 @@ end
 Detach and delete volume by id:
 
 ```ruby
-rackspacecloud_cbs "myvolume-01" do 
-  volume_id "74fe8714-fd92-4d07-a6a2-ddd15ed09f79" 
+rackspacecloud_cbs "myvolume-01" do
+  volume_id "74fe8714-fd92-4d07-a6a2-ddd15ed09f79"
   rackspace_username "userName"
   rackspace_api_key "apiKey"
   rackspace_region "ord"
@@ -356,7 +361,7 @@ Author:: Zack Feldstein (<zack.feldstein@rackspace.com>)
 Author:: Steven Gonzales (<steven.gonzales@rackspace.com>)
 
 
-Copyright 2013, Rackspace Hosting 
+Copyright 2013, Rackspace Hosting
 Copyright 2013, Opscode, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
