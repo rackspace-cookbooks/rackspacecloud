@@ -28,7 +28,4 @@ attribute :node_address, :kind_of => String, :required => true
 attribute :condition, :kind_of => String,  :default => "ENABLED", :required => true
 attribute :port, :kind_of => Integer, :default => 80, :required => true
 
-attr_accessor :exists
-
-
-
+attr_accessor :exists, :nodes, :lb, :node
