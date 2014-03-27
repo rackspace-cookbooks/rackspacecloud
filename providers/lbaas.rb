@@ -71,7 +71,7 @@ action :add_node do
   converge_by("Adding node to cloud load balancer #{new_resource.load_balancer_id}" ) do
     #Check if LB exists
     lb_action{|lb_details|
-      add_node if not lb_details['nodes'].any? {|node_data| (node_data['address'] == new_resource.node_address) }
+      add_node if not lb_details['nodes'].nil? {|node_data| (node_data['address'] == new_resource.node_address) }
     }
     end
 end
