@@ -24,21 +24,50 @@ end
 
 def load_current_resource
   @current_resource = Chef::Resource::RackspacecloudLbaas.new(@new_resource.name)
-  lb_exists = nil
-  lb_action{|lb_details| lb_exists = lb_details }
-  if lb_exists
-    @current_resource.exists = true
+  lb = get_lb
+  if lb
+    @current_resource.lb = lb
+    @current_resource.nodes = get_nodes
+    @current_resource.node = get_node
   else
-    @current_resource.exists = false
+    @current_resource
   end
-  @current_resource
 end
 
+def check_node_exists
+  if @current_resource.lb && !@current_resource.nodes.empty?
+    @current_resource.nodes.map {|node| true if node.address == @new_resource.node_address}
+  end
+end
+
+def get_lb
+  begin
+    lb = lbaas.load_balancers.get(new_resource.load_balancer_id)
+  rescue Fog::Rackspace::LoadBalancers::NotFound
+    raise "Load balancer ID specified does not exist, please create load balancer and provide a valid ID"
+  end
+  return lb
+end
+
+def get_node
+  if @current_resource.lb && !@current_resource.nodes.empty?
+    if check_node_exists
+      node = @current_resource.nodes.map {|node| node.id if node.address == @new_resource.node_address}
+      return @current_resource.nodes.get(node[0])
+    end
+  end
+end
+
+def get_nodes
+  if @current_resource.lb
+    @current_resource.lb.nodes
+  end
+end
 
 def remove_node(node_id)
   begin
     lbaas.delete_node(new_resource.load_balancer_id, node_id)
-  rescue Fog::Rackspace::LoadBalancers::NotFound 
+  rescue Fog::Rackspace::LoadBalancers::NotFound
     Chef::Log.info "Node does not belong to specified load balancer ID"
   rescue Fog::Rackspace::LoadBalancers::ServiceError => e
     raise "An error occurred removing node from load balancer #{e}"
@@ -57,33 +86,20 @@ def add_node
   Chef::Log.info "Node successfully added to cloud loadbalancer"
 end
 
-def lb_action(&block)
-  begin
-    lb_details = lbaas.get_load_balancer(new_resource.load_balancer_id)
-  rescue Fog::Rackspace::LoadBalancers::NotFound
-    raise "Load balancer ID specified does not exist, please create load balancer and provide a valid ID"
-  end
-  yield lb_details.body['loadBalancer']
-end
-
 #add node to LB if it doesnt exist
 action :add_node do
-  converge_by("Adding node to cloud load balancer #{new_resource.load_balancer_id}" ) do
-    #Check if LB exists
-    lb_action{|lb_details|
-      add_node if not lb_details['nodes'].nil? {|node_data| (node_data['address'] == new_resource.node_address) }
-    }
+  unless check_node_exists
+    converge_by("Adding node to cloud load balancer #{new_resource.load_balancer_id}" ) do
+      add_node
     end
-end
-
-
-action :remove_node do
-  converge_by("Removing Node from cloud load balancer #{new_resource.load_balancer_id}") do
-    lb_action{|lb_details|
-      #Find Node id and remove it
-      node_id = lb_details['nodes'].select{|node_data| node_data['address'] == new_resource.node_address}.map {|node_id| node_id['id']}.first
-      remove_node(node_id) if node_id 
-    }
   end
 end
 
+action :remove_node do
+  if check_node_exists
+    converge_by("Removing Node from cloud load balancer #{new_resource.load_balancer_id}") do
+      node_id = @current_resource.node.id
+      remove_node(node_id) if node_id
+    end
+  end
+end
