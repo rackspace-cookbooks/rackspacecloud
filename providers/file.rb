@@ -49,12 +49,13 @@ action :create do
   end
 
   directory = get_directory(new_resource.directory)
-  directory.files.get(::File.basename(new_resource.filename)) do |data, remaining, content_length|
-    f.syswrite data
-  end
+  remote_file = directory.files.get(::File.basename(new_resource.filename))
 
-  new_resource.checksum = Chef::Digester.checksum_for_file(f.path)
-  if !current_resource.exists || (current_resource.checksum != new_resource.checksum)
+  if !current_resource.exists || remote_file.etag != current_resource.checksum
+    directory.files.get(::File.basename(new_resource.filename)) do |data, remaining, content_length|
+      f.syswrite data
+    end
+
     converge_by("Moving new file with checksum to #{new_resource.filename}") do
       move_file(f.path, new_resource.filename)
     end
