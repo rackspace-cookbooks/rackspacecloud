@@ -17,6 +17,6 @@
 # limitations under the License.
 #
 
-default[:rackspacecloud][:fog_version] = "1.21.0"
+default[:rackspacecloud][:fog_version] = "1.22.0"
 default[:rackspacecloud][:rackspace_auth_url] = "identity.api.rackspacecloud.com"
 default[:rackspacecloud][:rackspace_auth_region] = "us"
