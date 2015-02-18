@@ -51,6 +51,10 @@ action :create do
   directory = get_directory(new_resource.directory)
   remote_file = directory.files.get(::File.basename(new_resource.filename))
 
+  puts 'current file checksum: ' + current_resource.checksum
+  puts 'cloud files checksum: ' + remote_file.etag
+
+
   if !current_resource.exists || remote_file.etag != current_resource.checksum
     directory.files.get(::File.basename(new_resource.filename)) do |data, remaining, content_length|
       f.syswrite data
