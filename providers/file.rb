@@ -33,7 +33,7 @@ def load_current_resource
 
   if ::File.exists?(@current_resource.filename)
     @current_resource.exists = true
-    @current_resource.checksum = Chef::Digester.checksum_for_file(@current_resource.filename)
+    @current_resource.checksum = Chef::Digester.generate_md5_checksum_for_file(@current_resource.filename)
   else
     @current_resource.exists = false
   end
