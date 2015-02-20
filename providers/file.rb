@@ -33,7 +33,7 @@ def load_current_resource
 
   if ::File.exists?(@current_resource.filename)
     @current_resource.exists = true
-    @current_resource.checksum = Chef::Digester.checksum_for_file(@current_resource.filename)
+    @current_resource.checksum = Chef::Digester.generate_md5_checksum_for_file(@current_resource.filename)
   else
     @current_resource.exists = false
   end
@@ -51,13 +51,16 @@ action :create do
   directory = get_directory(new_resource.directory)
   remote_file = directory.files.get(::File.basename(new_resource.filename))
 
-  if !current_resource.exists || remote_file.etag != current_resource.checksum
+  if current_resource.exists && remote_file.etag != current_resource.checksum
     directory.files.get(::File.basename(new_resource.filename)) do |data, remaining, content_length|
       f.syswrite data
     end
-
     converge_by("Moving new file with checksum to #{new_resource.filename}") do
       move_file(f.path, new_resource.filename)
+    end
+  elsif !current_resource.exists
+    directory.files.get(::File.basename(new_resource.filename)) do |data, remaining, content_length|
+      f.syswrite data
     end
   else
     f.unlink
