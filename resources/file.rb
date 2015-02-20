@@ -27,9 +27,6 @@ attribute :rackspace_api_key, :kind_of => String, :required => true
 attribute :rackspace_region, :kind_of => String, :default => "dfw"
 attribute :rackspace_auth_url, :kind_of => String
 attribute :filename, :kind_of => String, :name_attribute => true
-attribute :group,    :regex => [ /^([a-z]|[A-Z]|[0-9]|_|-)+$/, /^\d+$/ ]
-attribute :owner,    :regex => [ /^([a-z]|[A-Z]|[0-9]|_|-)+$/, /^\d+$/ ]
-attribute :mode,     :regex => /^0?\d{3,4}$/
 attribute :directory, :kind_of => String, :required => true
 attribute :binmode, :kind_of => [ TrueClass, FalseClass ], :default => false
 
