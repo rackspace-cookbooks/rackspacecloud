@@ -55,9 +55,12 @@ action :create do
     directory.files.get(::File.basename(new_resource.filename)) do |data, remaining, content_length|
       f.syswrite data
     end
-
     converge_by("Moving new file with checksum to #{new_resource.filename}") do
       move_file(f.path, new_resource.filename)
+    end
+  elsif !current_resource.exists
+    directory.files.get(::File.basename(new_resource.filename)) do |data, remaining, content_length|
+      f.syswrite data
     end
   else
     f.unlink
