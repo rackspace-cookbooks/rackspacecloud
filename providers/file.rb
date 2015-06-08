@@ -51,16 +51,12 @@ action :create do
   directory = get_directory(new_resource.directory)
   remote_file = directory.files.get(::File.basename(new_resource.filename))
 
-  if current_resource.exists && remote_file.etag != current_resource.checksum
+  if (current_resource.exists && remote_file.etag != current_resource.checksum) || !current_resource.exists
     directory.files.get(::File.basename(new_resource.filename)) do |data, remaining, content_length|
       f.syswrite data
     end
     converge_by("Moving new file with checksum to #{new_resource.filename}") do
       move_file(f.path, new_resource.filename)
-    end
-  elsif !current_resource.exists
-    directory.files.get(::File.basename(new_resource.filename)) do |data, remaining, content_length|
-      f.syswrite data
     end
   else
     f.unlink
@@ -99,7 +95,7 @@ end
 # Defining custom method to work around EACCESS errors on Windows when attempting to move across devices.
 # Attrib to tknerr for workaround found in Berkshelf issue #140
 def move_file(src, dest)
-begin
+  begin
     FileUtils.mv(src, dest, force: false)
   rescue Errno::EACCES
     FileUtils.cp_r(src, dest)
