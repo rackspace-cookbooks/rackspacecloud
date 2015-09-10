@@ -49,7 +49,13 @@ action :create do
   end
 
   directory = get_directory(new_resource.directory)
-  directory.files.get(::File.basename(new_resource.filename)) do |data, remaining, content_length|
+  if new_resource.filepath
+    filepath = new_resource.filepath
+  else
+    filepath = ::File.basename(new_resource.filename)
+  end
+  
+  directory.files.get(filepath) do |data, remaining, content_length|
     f.syswrite data
   end
 

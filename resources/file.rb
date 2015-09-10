@@ -28,6 +28,7 @@ attribute :rackspace_region, :kind_of => String, :default => "dfw"
 attribute :rackspace_auth_url, :kind_of => String
 attribute :filename, :kind_of => String, :name_attribute => true
 attribute :directory, :kind_of => String, :required => true
+attribute :filepath, :kind_of => String
 attribute :binmode, :kind_of => [ TrueClass, FalseClass ], :default => false
 
 attr_accessor :exists
