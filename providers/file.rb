@@ -49,12 +49,18 @@ action :create do
   end
 
   directory = get_directory(new_resource.directory)
-  remote_file = directory.files.get(::File.basename(new_resource.filename))
+  if new_resource.cloudfile_uri
+    cloudfile_uri = new_resource.cloudfile_uri
+  else
+    cloudfile_uri = ::File.basename(new_resource.filename)
+  end
+  
+  directory.files.get(cloudfile_uri) do |data, remaining, content_length|
+    f.syswrite data
+  end
 
-  if (current_resource.exists && remote_file.etag != current_resource.checksum) || !current_resource.exists
-    directory.files.get(::File.basename(new_resource.filename)) do |data, remaining, content_length|
-      f.syswrite data
-    end
+  new_resource.checksum = Chef::Digester.checksum_for_file(f.path)
+  if !current_resource.exists || (current_resource.checksum != new_resource.checksum)
     converge_by("Moving new file with checksum to #{new_resource.filename}") do
       move_file(f.path, new_resource.filename)
     end
@@ -75,11 +81,18 @@ action :upload do
     # Use md5 checksums because CloudFiles etag is md5
     new_resource.checksum = Chef::Digester.generate_md5_checksum_for_file(new_resource.filename)
     directory = get_directory(new_resource.directory)
-    remote_file = directory.files.get(::File.basename(new_resource.filename))
+    
+    if new_resource.cloudfile_uri
+      cloudfile_uri = new_resource.cloudfile_uri
+    else
+      cloudfile_uri = ::File.basename(new_resource.filename)
+    end
+    
+    remote_file = directory.files.get(cloudfile_uri)
     if remote_file.nil? || remote_file.etag != new_resource.checksum
       converge_by("Uploading new file #{::File.basename(new_resource.filename)} with
        checksum #{new_resource.checksum} to #{new_resource.directory} container") do
-        directory.files.create :key => ::File.basename(new_resource.filename),
+        directory.files.create :key => cloudfile_uri,
                                :body => ::File.open(new_resource.filename)
       end
     end

@@ -159,6 +159,18 @@ end
 ```ruby
 rackspacecloud_file "/usr/share/tomcat5/webapps/demo.war" do
   directory "wars"
+  cloudfile_uri "my_subdirectory/demo.war"
+  rackspace_username "foo"
+  rackspace_api_key "nnnnnnnnnnn"
+  rackspace_region "ORD"
+  binmode true
+  action :create
+end
+```
+
+```ruby
+rackspacecloud_file "/usr/share/tomcat5/webapps/demo.war" do
+  directory "wars"
   rackspace_username "foo"
   rackspace_api_key "nnnnnnnnnnn"
   rackspace_region "ORD"
@@ -168,7 +180,9 @@ end
 ```
 
 ### Attributes:
-* ```directory```: The directory on Rackspace Cloud Files where the file can be found or should be uploaded to.
+* ```filename```: The local filepath to download the file to. This is the named_attribute. 
+* ```directory```: The container on Rackspace Cloud Files where the file can be found or should be uploaded to.
+* ```cloudfile_uri```:  The path on Rackspace Cloud Files where the file can be found or uploaded to. This is the path under the container.  Eg. if the full path is my_container/my_subdirectory/my_file then cloudfile_uri should be my_subdirectory/my_file.  If cloudfile_uri is blank, the file is assumed to be in the root of the container, with the filename derived from the filename attribute.
 * ```rackspace_username```: The Rackspace API username. Can be retrieved from data bag or node attributes.
 * ```rackspace_api_key```: The Rackspace API key. Can be retrieved from data bag or node attributes.
 * ```rackspace_region```: The Rackspace Cloud Files region (ORD, DFW, HKG, IAD, etc.)
