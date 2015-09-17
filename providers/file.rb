@@ -59,7 +59,7 @@ action :create do
     f.syswrite data
   end
 
-  new_resource.checksum = Chef::Digester.checksum_for_file(f.path)
+  new_resource.checksum = Chef::Digester.generate_md5_checksum_for_file(f.path)
   if !current_resource.exists || (current_resource.checksum != new_resource.checksum)
     converge_by("Moving new file with checksum to #{new_resource.filename}") do
       move_file(f.path, new_resource.filename)
