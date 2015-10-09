@@ -1,43 +1,24 @@
 ---
-driver_plugin: vagrant
-driver_config:
-  require_chef_omnibus: latest
+driver:
+  name: vagrant
+
 platforms:
-- name: ubuntu-12.04
-  driver_config:
-    box: ubuntu-12.04
-    box_url: http://files.vagrantup.com/precise64.box
-  run_list:
-  - recipe[apt]
-  attributes:
-    apt:
-      compile_time_update: true
-- name: ubuntu-10.04
-  driver_config:
-    box: opscode-ubuntu-10.04
-    box_url: http://opscode-vm.s3.amazonaws.com/vagrant/opscode_ubuntu-10.04_chef-11.2.0.box
-  run_list:
-  - recipe[apt]
-  attributes:
-    xml:
-      nokogiri:
-        use_system_libraries: false
-    apt:
-      compile_time_update: true
-- name: centos-6.3
-  driver_config:
-    box: opscode-centos-6.3
-    box_url: http://opscode-vm.s3.amazonaws.com/vagrant/opscode_centos-6.3_chef-11.2.0.box
-  run_list:
-  - recipe[yum-epel]
-- name: centos-5.8
-  driver_config:
-    box: opscode-centos-5.8
-    box_url: http://opscode-vm.s3.amazonaws.com/vagrant/opscode_centos-5.8_chef-11.2.0.box
-  run_list:
-  - recipe[yum-epel]
+  - name: ubuntu-14.04
+    run_list:
+    - recipe[apt]
+  - name: ubuntu-12.04
+    run_list:
+    - recipe[apt]
+  - name: centos-6.7
+    run_list:
+    - recipe[yum]
+
+# default values: https://github.com/test-kitchen/test-kitchen/blob/master/lib/kitchen/provisioner/chef_base.rb#L183-L190
+provisioner:
+  name: chef_zero
+  require_chef_omnibus: true
+
 suites:
-- name: default
-  run_list:
-#  - recipe[minitest-handler]
-  - recipe[rackspacecloud_test]
+  - name: default
+    run_list:
+      - recipe[rackspacecloud_test]

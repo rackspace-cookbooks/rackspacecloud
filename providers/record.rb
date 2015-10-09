@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: rackspacecloud 
+# Cookbook Name:: rackspacecloud
 # Provider:: record
 #
 # Copyright:: 2013, Rackspace Hosting <ryan.walker@rackspace.com>
@@ -31,9 +31,11 @@ action :add do
     begin
       zone.records.create(:name => new_resource.record, :value => new_resource.value, :type => new_resource.type, :ttl => new_resource.ttl)
     rescue Fog::DNS::Rackspace::CallbackError => error
-      raise "Could not create DNS record: #{error}"
+      Chef::Log.warn "Could not create DNS record"
+      raise error # preserve unknown errors and pass them along
     rescue Fog::Rackspace::Errors::BadRequest => error
-      raise "There was a problem with the Create DNS Record request: #{error}"
+      Chef::Log.warn "There was a problem with the Create DNS Record request"
+      raise error # preserve unknown errors and pass them along
     end
     Chef::Log.info "#{new_resource.type} record created for #{new_resource.name}: #{new_resource.record} => #{new_resource.value}"
   end
@@ -58,9 +60,11 @@ action :update do
       begin
         record.save
       rescue Fog::DNS::Rackspace::CallbackError => error
-        raise "Could not update DNS record: #{error}"
+        Chef::Log.warn "Could not update DNS record"
+        raise error # preserve unknown errors and pass them along
       rescue Fog::Rackspace::Errors::BadRequest => error
-        raise "There was a problem updating the Create DNS record: #{error}"
+        Chef::Log.warn "There was a problem updating the Create DNS record"
+        raise error # preserve unknown errors and pass them along
       end
       Chef::Log.info "#{new_resource.type} record updated for #{new_resource.name}: #{new_resource.record} => #{new_resource.value}"
     end
@@ -69,9 +73,11 @@ action :update do
     begin
       zone.records.create(:name => new_resource.record, :value => new_resource.value, :type => new_resource.type, :ttl => new_resource.ttl)
     rescue Fog::DNS::Rackspace::CallbackError => error
-      raise "Could not create DNS record: #{error}"
+      Chef::Log.warn "Could not create DNS record"
+      raise error # preserve unknown errors and pass them along
     rescue Fog::Rackspace::Errors::BadRequest => error
-      raise "There was a problem with the Create DNS Record request: #{error}"
+      Chef::Log.warn "There was a problem with the Create DNS Record request"
+      raise error # preserve unknown errors and pass them along
     end
     Chef::Log.info "#{new_resource.type} record created for #{new_resource.name}: #{new_resource.record} => #{new_resource.value}"
   end
@@ -85,9 +91,11 @@ action :delete do
     begin
       record.destroy
     rescue Fog::DNS::Rackspace::CallbackError => error
-      raise "Could not delete DNS record: #{error}"
+      Chef::Log.warn "Could not delete DNS record"
+      raise error # preserve unknown errors and pass them along
     rescue Fog::Rackspace::Errors::BadRequest => error
-      raise "There was a problem deleting the DNS record: #{error}"
+      Chef::Log.warn "There was a problem deleting the DNS record"
+      raise error # preserve unknown errors and pass them along
     end
     Chef::Log.info("Record #{new_resource.record} deleted for domain #{new_resource.name}")
   else
@@ -118,7 +126,7 @@ def record_exists?(zone=nil)
   zone.records.all.each do |record|
     if record.name == new_resource.record
       return record.id
-    end 
+    end
   end
   return false
 end
