@@ -69,8 +69,9 @@ def remove_node(node_id)
     lbaas.delete_node(new_resource.load_balancer_id, node_id)
   rescue Fog::Rackspace::LoadBalancers::NotFound
     Chef::Log.info "Node does not belong to specified load balancer ID"
-  rescue Fog::Rackspace::LoadBalancers::ServiceError => e
-    raise "An error occurred removing node from load balancer #{e}"
+  rescue Fog::Rackspace::LoadBalancers::ServiceError => err
+    Chef::Log.warn "An error occurred removing node from load balancer"
+    raise err # preserve unknown errors and pass them along
   else
     Chef::Log.info "Node has been removed from load balancer pool"
   end
@@ -80,8 +81,9 @@ def add_node
   begin
     #add the node
     create_response = lbaas.create_node(new_resource.load_balancer_id, new_resource.node_address, new_resource.port, new_resource.condition)
-  rescue Fog::Rackspace::LoadBalancers::ServiceError => e
-    raise "An error occured making the create node request: #{e}"
+  rescue Fog::Rackspace::LoadBalancers::ServiceError => err
+    Chef::Log.warn "An error occured making the create node request"
+    raise err # preserve unknown errors and pass them along
   end
   Chef::Log.info "Node successfully added to cloud loadbalancer"
 end
