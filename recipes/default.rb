@@ -21,7 +21,12 @@ include_recipe 'xml::ruby' unless platform_family?("windows")
 
 chef_gem "fog" do
   version node[:rackspacecloud][:fog_version]
+  compile_time true if Chef::Resource::ChefGem.method_defined?(:compile_time)
   action :install
+end
+
+chef_gem 'mime-types' do
+  compile_time true if Chef::Resource::ChefGem.method_defined?(:compile_time)
 end
 
 require 'fog'
