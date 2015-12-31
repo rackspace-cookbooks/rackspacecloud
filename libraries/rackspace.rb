@@ -17,19 +17,15 @@
 # limitations under the License.
 #
 
-
 module Opscode
   module Rackspace
-
-      def initialize(name, run_context=nil)
-        super
-        begin
-          require 'fog'
-        rescue LoadError
-          Chef::Log.error("Missing gem 'fog'. Use the default rackspace recipe to install it first.")
-        end
-
-     end
-
+    def initialize(name, run_context = nil)
+      super
+      begin
+        require 'fog'
+      rescue LoadError
+        Chef::Log.error("Missing gem 'fog'. Use the default rackspace recipe to install it first.")
+      end
+    end
   end
 end

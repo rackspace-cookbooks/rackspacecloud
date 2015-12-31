@@ -19,18 +19,13 @@
 module Opscode
   module Rackspace
     module LoadBalancers
-
       include Opscode::Rackspace
 
       def lbaas
-
-        @@lbaas ||= Fog::Rackspace::LoadBalancers.new({
-        	:rackspace_username  => new_resource.rackspace_username,
-        	:rackspace_api_key   => new_resource.rackspace_api_key,
-        	:rackspace_region    => new_resource.rackspace_region || :dfw,
-        	:rackspace_auth_url  => new_resource.rackspace_auth_url || Fog::Rackspace::US_AUTH_ENDPOINT
-        })
-
+        @@lbaas ||= Fog::Rackspace::LoadBalancers.new(rackspace_username: new_resource.rackspace_username,
+                                                      rackspace_api_key: new_resource.rackspace_api_key,
+                                                      rackspace_region: new_resource.rackspace_region || :dfw,
+                                                      rackspace_auth_url: new_resource.rackspace_auth_url || Fog::Rackspace::US_AUTH_ENDPOINT)
       end
     end
   end

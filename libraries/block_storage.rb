@@ -19,30 +19,21 @@
 module Opscode
   module Rackspace
     module BlockStorage
-
       include Opscode::Rackspace
 
       def cbs
-
-        @@cbs ||= Fog::Rackspace::BlockStorage.new({
-                :rackspace_username  => new_resource.rackspace_username,
-                :rackspace_api_key   => new_resource.rackspace_api_key,
-                :rackspace_region    => new_resource.rackspace_region || :dfw,
-                :rackspace_auth_url  => new_resource.rackspace_auth_url || Fog::Rackspace::US_AUTH_ENDPOINT
-        })
-
+        @@cbs ||= Fog::Rackspace::BlockStorage.new(rackspace_username: new_resource.rackspace_username,
+                                                   rackspace_api_key: new_resource.rackspace_api_key,
+                                                   rackspace_region: new_resource.rackspace_region || :dfw,
+                                                   rackspace_auth_url: new_resource.rackspace_auth_url || Fog::Rackspace::US_AUTH_ENDPOINT)
       end
 
       def compute
-
-        @@compute ||= Fog::Compute.new({
-                :provider => 'Rackspace',
-                :rackspace_username  => new_resource.rackspace_username,
-                :rackspace_api_key   => new_resource.rackspace_api_key,
-                :rackspace_region    => new_resource.rackspace_region || :dfw,
-                :rackspace_auth_url  => new_resource.rackspace_auth_url || Fog::Rackspace::US_AUTH_ENDPOINT
-        })
-
+        @@compute ||= Fog::Compute.new(provider: 'Rackspace',
+                                       rackspace_username: new_resource.rackspace_username,
+                                       rackspace_api_key: new_resource.rackspace_api_key,
+                                       rackspace_region: new_resource.rackspace_region || :dfw,
+                                       rackspace_auth_url: new_resource.rackspace_auth_url || Fog::Rackspace::US_AUTH_ENDPOINT)
       end
     end
   end

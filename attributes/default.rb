@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: rackspacecloud
-# Attributes:: default 
+# Attributes:: default
 #
 # Copyright:: 2013, Rackspace Hosting <ryan.walker@rackspace.com>
 #
@@ -17,6 +17,6 @@
 # limitations under the License.
 #
 
-default[:rackspacecloud][:fog_version] = "1.22.0"
-default[:rackspacecloud][:rackspace_auth_url] = "identity.api.rackspacecloud.com"
-default[:rackspacecloud][:rackspace_auth_region] = "us"
+default['rackspacecloud']['fog_version'] = '1.22.0'
+default['rackspacecloud']['rackspace_auth_url'] = 'identity.api.rackspacecloud.com'
+default['rackspacecloud']['rackspace_auth_region'] = 'us'
