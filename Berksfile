@@ -1,4 +1,4 @@
-site :opscode
+source 'https://supermarket.chef.io'
 
 metadata
 
@@ -7,5 +7,5 @@ group :integration do
   cookbook "build-essential"
   cookbook "yum-epel"
   cookbook "minitest-handler"
-  cookbook "rackspacecloud_test", :path => "./test/cookbooks/rackspacecloud_test"
+  cookbook "rackspacecloud_test", :path => "./test/fixtures/cookbooks/rackspacecloud_test"
 end
