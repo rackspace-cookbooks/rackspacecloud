@@ -135,3 +135,58 @@ rackspacecloud_cbs "test-cbs-03" do
   rackspace_region "ord"
   action :detach_and_delete
 end
+
+## Cloud Database ##
+# create a DB (TODO)
+#
+#rackspacecloud_dbaas 'test-db' do
+#  flavor '1GB Instance'
+#  size 10
+#  datastore_type 'MySQL'
+#  datastore_version '5.6'
+#  rackspace_username "foo"
+#  rackspace_api_key "nnnnnnnnnnn"
+#  rackspace_region "ord"
+#  action :create
+#end
+
+# All commented out for now as Fog doesn't support Mock for Dbaas
+# create a user
+#rackspacecloud_dbaas_user "MyUser" do
+#  instance "0a000b0f-00b0-000d-b00-0b0d0000c00a"
+#  databases ["database1", "database2"]
+#  password "secret"
+#  host "%"
+#  rackspace_username "userName"
+#  rackspace_api_key "apiKey"
+#  rackspace_region "ORD"
+#  action :create
+#end
+#
+#rackspacecloud_dbaas_user "MyUser" do
+#  instance "0a000b0f-00b0-000d-b00-0b0d0000c00a"
+#  databases ["database1", "database2"]
+#  host "%"
+#  rackspace_username "userName"
+#  rackspace_api_key "apiKey"
+#  rackspace_region "ORD"
+#  action :grant
+#end
+#
+#rackspacecloud_dbaas_user "MyUser" do
+#  instance "0a000b0f-00b0-000d-b00-0b0d0000c00a"
+#  databases ["database1", "database2"]
+#  host "%"
+#  rackspace_username "userName"
+#  rackspace_api_key "apiKey"
+#  rackspace_region "ORD"
+#  action :revoke
+#end
+#
+#rackspacecloud_dbaas_user "MyUser" do
+#  instance "0a000b0f-00b0-000d-b00-0b0d0000c00a"
+#  rackspace_username "userName"
+#  rackspace_api_key "apiKey"
+#  rackspace_region "ORD"
+#  action :delete
+#end
