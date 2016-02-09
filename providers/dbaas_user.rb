@@ -30,7 +30,6 @@ def load_current_resource
     @current_resource.exists = true
     @current_resource.username = user['name']
     @current_resource.databases = user['databases']
-    @current_resource.granted = @current_resource.databases == dbarray_to_dbhash(new_resource.databases) ? true : false
     @current_resource.host = user['host']
   else
     @current_resource.exists = false
@@ -88,7 +87,7 @@ rescue Fog::Rackspace::Databases::NotFound
   raise 'Database instance ID or user specified does not exist, please create a database and provide a valid ID'
 else
   Chef::Log.info "User #{new_resource.username} has been granted access to the following databases: " +
-  new_resource.databases.join
+  new_resource.databases.join(",")
 end
 
 def revoke_user_access
@@ -102,7 +101,7 @@ rescue Fog::Rackspace::Databases::NotFound
   raise 'Database instance ID or user specified does not exist, please create a database and provide a valid ID'
 else
   Chef::Log.info "User #{new_resource.username} has been denied access to the following databases: " +
-  new_resource.databases.join
+  new_resource.databases.join(",")
 end
 
 def check_user_exists
@@ -110,7 +109,7 @@ def check_user_exists
 end
 
 def check_grant_exists
-  @current_resource.granted && (@current_resource.host == new_resource.host)
+  dbarray_to_dbhash(new_resource.databases).all? { |e| @current_resource.databases.include?(e) } && (@current_resource.host == new_resource.host)
 end
 
 action :create do
@@ -136,7 +135,7 @@ action :grant do
     end
   end
   unless check_grant_exists
-    converge_by("Giving user #{new_resource.username} access to databases: #{new_resource.databases.join}") do
+    converge_by("Giving user #{new_resource.username} access to databases: #{new_resource.databases.join(",")}") do
       grant_user_access
     end
   end
@@ -144,8 +143,10 @@ end
 
 action :revoke do
   if check_grant_exists
-    converge_by("Revoking user #{new_resource.username} access from databases: #{new_resource.databases.join}") do
+    converge_by("Revoking user #{new_resource.username} access from databases: #{new_resource.databases.join(",")}") do
       revoke_user_access
     end
+  else
+    Chef::Application.fatal!('The requested grant was not found while trying to revoke!')
   end
 end

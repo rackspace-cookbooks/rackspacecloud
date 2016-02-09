@@ -29,4 +29,4 @@ attribute :instance, :kind_of => String, :required => true
 attribute :password, :kind_of => String
 attribute :host, :kind_of => String,  :default => "%"
 
-attr_accessor :exists, :granted
+attr_accessor :exists
