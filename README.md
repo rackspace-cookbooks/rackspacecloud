@@ -8,10 +8,11 @@ Currently supported resources:
 * Rackspace Cloud Files ( rackspacecloud_file )
 * Rackspace Cloud Block storage ( rackspacecloud_cbs )
 * Rackspace Cloud Load Balancers ( rackspacecloud_lbaas)
+* Rackspace Cloud Database to manage users ( rackspacecloud_dbaas_user )
 
 Coming soon:
 
-* Rackspace Cloud Database
+* Rackspace Cloud Database (to manage instances)
 * Rackspace Cloud Servers
 
 Not Included:
@@ -77,6 +78,8 @@ The cookbook has several library modules which can be included where necessary:
 ```ruby
 Opscode::Rackspace
 Opscode::Rackspace::BlockStorage
+Opscode::Rackspace::Databases
+Opscode::Rackspace::LoadBalancers
 Opscode::Rackspace::DNS
 Opscode::Rackspace::Storage
 ```
@@ -213,6 +216,82 @@ end
 * ```rackspace_api_key```: The Rackspace API key. Can be retrieved from data bag or node attributes.
 * ```rackspace_region```: Region for load balancer (ORD, DFW, HKG, IAD, etc.)
 * ```action```: ```:add_node``` or ```:remove_node```. Default is ```:add_node```.
+
+
+rackspacecloud_dbaas_user
+-------------------
+
+Create/delete a user on/from a Database instance. Example:
+
+
+```ruby
+rackspacecloud_dbaas_user "MyUserName" do
+  instance "0a000b0f-00b0-000d-b00-0b0d0000c00a"
+  databases ["database1", "database2"]
+  password "thisissecret"
+  host "%"
+  rackspace_username "userName"
+  rackspace_api_key "apiKey"
+  rackspace_region "ORD"
+  action :create
+end
+```
+
+It will create the user `MyUserName` on the database instance `0a000b0f-00b0-000d-b00-0b0d0000c00a`. In addition it will grant access to this user on the database `database1` and `database2` from the host `%`.
+
+```ruby
+rackspacecloud_dbaas_user "MyUserName" do
+  instance "0a000b0f-00b0-000d-b00-0b0d0000c00a"
+  rackspace_username "userName"
+  rackspace_api_key "apiKey"
+  rackspace_region "ORD"
+  action :delete
+end
+```
+
+It will delete the user `MyUserName` from the database instance `0a000b0f-00b0-000d-b00-0b0d0000c00a`
+
+Grant or revoke access to a user to a Database.
+
+```ruby
+rackspacecloud_dbaas_user "MyUserName" do
+  instance "0a000b0f-00b0-000d-b00-0b0d0000c00a"
+  databases ["database1", "database2"]
+  host "%"
+  rackspace_username "userName"
+  rackspace_api_key "apiKey"
+  rackspace_region "ORD"
+  action :grant
+end
+```
+
+It will grant access to `MyUserName` on the database `database1` and `database2` from the host `%`. If the user doesn't exist, it will be created
+
+```ruby
+rackspacecloud_dbaas_user "MyUserName" do
+  instance "0a000b0f-00b0-000d-b00-0b0d0000c00a"
+  databases ["database1", "database2"]
+  host "%"
+  rackspace_username "userName"
+  rackspace_api_key "apiKey"
+  rackspace_region "ORD"
+  action :revoke
+end
+```
+
+It will revoke access to `MyUserName` from the database `database1` and `database2`
+
+### Attributes:
+* ```instance```: Id of the database instance to act on.
+* ```username```: Name of the user (default to resource name)
+* ```databases```: Array of databases to grant/revoke access to.
+* ```host```: Host source to grant access from (default to `%`)
+* ```password```: User's password
+* ```rackspace_username```: The Rackspace API username. Can be retrieved from data bag or node attributes.
+* ```rackspace_api_key```: The Rackspace API key. Can be retrieved from data bag or node attributes.
+* ```rackspace_region```: Region for load balancer (ORD, DFW, HKG, IAD, etc.)
+* ```action```: ```:create```,```:delete```, ```grant``` or ```revoke```. Default is ```:create```.
+
 
 
 rackspacecloud_cbs
