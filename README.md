@@ -8,7 +8,7 @@ Currently supported resources:
 * Rackspace Cloud Files ( rackspacecloud_file )
 * Rackspace Cloud Block storage ( rackspacecloud_cbs )
 * Rackspace Cloud Load Balancers ( rackspacecloud_lbaas)
-* Rackspace Cloud Database to manage users ( rackspacecloud_dbaas_user )
+* Rackspace Cloud Database to manage users and databases
 
 Coming soon:
 
@@ -217,6 +217,44 @@ end
 * ```rackspace_region```: Region for load balancer (ORD, DFW, HKG, IAD, etc.)
 * ```action```: ```:add_node``` or ```:remove_node```. Default is ```:add_node```.
 
+
+rackspacecloud_dbaas_db
+-------------------
+
+Create/delete a database from an instance. Example:
+
+
+```ruby
+rackspacecloud_dbaas_db "MyDatabase" do
+  instance "0a000b0f-00b0-000d-b00-0b0d0000c00a"
+  rackspace_username "userName"
+  rackspace_api_key "apiKey"
+  rackspace_region "ORD"
+  action :create
+end
+```
+
+It will create the database `MyDatabase` on the database instance `0a000b0f-00b0-000d-b00-0b0d0000c00a`. If you need to give access to a user for this database, you should use `rackspacecloud_dbaas_user`
+
+```ruby
+rackspacecloud_dbaas_db "MyDatabase" do
+  instance "0a000b0f-00b0-000d-b00-0b0d0000c00a"
+  rackspace_username "userName"
+  rackspace_api_key "apiKey"
+  rackspace_region "ORD"
+  action :delete
+end
+```
+
+It will delete the database `MyDatabase` from the database instance `0a000b0f-00b0-000d-b00-0b0d0000c00a`
+
+### Attributes:
+* ```instance```: Id of the database instance to act on.
+* ```name```: Name of the database (default to resource name)
+* ```rackspace_username```: The Rackspace API username. Can be retrieved from data bag or node attributes.
+* ```rackspace_api_key```: The Rackspace API key. Can be retrieved from data bag or node attributes.
+* ```rackspace_region```: Region for load balancer (ORD, DFW, HKG, IAD, etc.)
+* ```action```: ```:create``` or```:delete```
 
 rackspacecloud_dbaas_user
 -------------------
