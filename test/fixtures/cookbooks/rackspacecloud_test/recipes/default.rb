@@ -190,3 +190,20 @@ end
 #  rackspace_region "ORD"
 #  action :delete
 #end
+
+## create a database
+#rackspacecloud_dbaas_db "MyDatabase" do
+#  instance "0a000b0f-00b0-000d-b00-0b0d0000c00a"
+#  rackspace_username "userName"
+#  rackspace_api_key "apiKey"
+#  rackspace_region "ORD"
+#  action :create
+#end
+## delete a database
+#rackspacecloud_dbaas_db "MyDatabase" do
+#  instance "0a000b0f-00b0-000d-b00-0b0d0000c00a"
+#  rackspace_username "userName"
+#  rackspace_api_key "apiKey"
+#  rackspace_region "ORD"
+#  action :delete
+#end
