@@ -19,21 +19,23 @@
 require 'ostruct'
 include Opscode::Rackspace::Databases
 
+use_inline_resources if defined?(use_inline_resources)
+
 def whyrun_supported?
   true
 end
 
 def load_current_resource
   @current_resource = Chef::Resource::RackspacecloudDbaasUser.new(@new_resource.name)
-  user = get_user
-  unless user.nil? || user.empty?
+  user = retr_user
+  if user.nil? || user.empty?
+    @current_resource.exists = false
+    @current_resource
+  else
     @current_resource.exists = true
     @current_resource.username = user['name']
     @current_resource.databases = user['databases']
     @current_resource.host = user['host']
-  else
-    @current_resource.exists = false
-    @current_resource
   end
 end
 
@@ -42,7 +44,7 @@ def dbarray_to_dbhash(databases)
   databases.map { |db| { 'name' => db } }
 end
 
-def get_user
+def retr_user
   begin
     user = dbaas.list_users(new_resource.instance).body['users'].find do |dbuser|
       dbuser['name'] == new_resource.username
@@ -87,7 +89,7 @@ rescue Fog::Rackspace::Databases::NotFound
   raise 'Database instance ID or user specified does not exist, please create a database and provide a valid ID'
 else
   Chef::Log.info "User #{new_resource.username} has been granted access to the following databases: " +
-  new_resource.databases.join(",")
+                 new_resource.databases.join(',')
 end
 
 def revoke_user_access
@@ -101,7 +103,7 @@ rescue Fog::Rackspace::Databases::NotFound
   raise 'Database instance ID or user specified does not exist, please create a database and provide a valid ID'
 else
   Chef::Log.info "User #{new_resource.username} has been denied access to the following databases: " +
-  new_resource.databases.join(",")
+                 new_resource.databases.join(',')
 end
 
 def check_user_exists
@@ -135,7 +137,7 @@ action :grant do
     end
   end
   unless check_grant_exists
-    converge_by("Giving user #{new_resource.username} access to databases: #{new_resource.databases.join(",")}") do
+    converge_by("Giving user #{new_resource.username} access to databases: #{new_resource.databases.join(',')}") do
       grant_user_access
     end
   end
@@ -143,7 +145,7 @@ end
 
 action :revoke do
   if check_grant_exists
-    converge_by("Revoking user #{new_resource.username} access from databases: #{new_resource.databases.join(",")}") do
+    converge_by("Revoking user #{new_resource.username} access from databases: #{new_resource.databases.join(',')}") do
       revoke_user_access
     end
   else

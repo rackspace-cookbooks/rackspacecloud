@@ -23,6 +23,8 @@ require 'chef/digester'
 
 include Opscode::Rackspace::Storage
 
+use_inline_resources if defined?(use_inline_resources)
+
 def whyrun_supported?
   true
 end
@@ -31,7 +33,7 @@ def load_current_resource
   @current_resource = Chef::Resource::RackspacecloudFile.new(@new_resource.name)
   @current_resource.filename(@new_resource.filename)
 
-  if ::File.exists?(@current_resource.filename)
+  if ::File.exist?(@current_resource.filename)
     @current_resource.exists = true
     @current_resource.checksum = Chef::Digester.generate_md5_checksum_for_file(@current_resource.filename)
   else
@@ -41,7 +43,6 @@ def load_current_resource
 end
 
 action :create do
-
   f = Tempfile.new('download')
 
   if new_resource.binmode
@@ -49,12 +50,12 @@ action :create do
   end
 
   directory = get_directory(new_resource.directory)
-  if new_resource.cloudfile_uri
-    cloudfile_uri = new_resource.cloudfile_uri
-  else
-    cloudfile_uri = ::File.basename(new_resource.filename)
-  end
-  
+  cloudfile_uri = if new_resource.cloudfile_uri
+                    new_resource.cloudfile_uri
+                  else
+                    ::File.basename(new_resource.filename)
+                  end
+
   directory.files.get(cloudfile_uri) do |data, remaining, content_length|
     f.syswrite data
   end
@@ -70,9 +71,9 @@ action :create do
 end
 
 action :create_if_missing do
-
-  if !current_resource.exists
+  unless current_resource.exists
     action_create
+    new_resource.updated_by_last_action(true)
   end
 end
 
@@ -81,19 +82,19 @@ action :upload do
     # Use md5 checksums because CloudFiles etag is md5
     new_resource.checksum = Chef::Digester.generate_md5_checksum_for_file(new_resource.filename)
     directory = get_directory(new_resource.directory)
-    
-    if new_resource.cloudfile_uri
-      cloudfile_uri = new_resource.cloudfile_uri
-    else
-      cloudfile_uri = ::File.basename(new_resource.filename)
-    end
-    
+
+    cloudfile_uri = if new_resource.cloudfile_uri
+                      new_resource.cloudfile_uri
+                    else
+                      ::File.basename(new_resource.filename)
+                    end
+
     remote_file = directory.files.get(cloudfile_uri)
     if remote_file.nil? || remote_file.etag != new_resource.checksum
       converge_by("Uploading new file #{::File.basename(new_resource.filename)} with
        checksum #{new_resource.checksum} to #{new_resource.directory} container") do
-        directory.files.create :key => cloudfile_uri,
-                               :body => ::File.open(new_resource.filename)
+        directory.files.create key: cloudfile_uri,
+                               body: ::File.open(new_resource.filename)
       end
     end
   end
@@ -108,10 +109,8 @@ end
 # Defining custom method to work around EACCESS errors on Windows when attempting to move across devices.
 # Attrib to tknerr for workaround found in Berkshelf issue #140
 def move_file(src, dest)
-  begin
-    FileUtils.mv(src, dest, force: false)
-  rescue Errno::EACCES
-    FileUtils.cp_r(src, dest)
-    FileUtils.rm_rf(src)
-  end
+  FileUtils.mv(src, dest, force: false)
+rescue Errno::EACCES
+  FileUtils.cp_r(src, dest)
+  FileUtils.rm_rf(src)
 end

@@ -19,11 +19,11 @@
 actions :create, :delete
 default_action :create
 
-attribute :rackspace_username, :kind_of => String, :required => true
-attribute :rackspace_api_key, :kind_of => String, :required => true
-attribute :rackspace_region, :kind_of => String, :default => "dfw"
-attribute :rackspace_auth_url, :kind_of => String
-attribute :name, :name_attribute => true,  :kind_of => String, :required => true
-attribute :instance, :kind_of => String, :required => true
+attribute :rackspace_username, kind_of: String, required: true
+attribute :rackspace_api_key, kind_of: String, required: true
+attribute :rackspace_region, kind_of: String, default: 'dfw'
+attribute :rackspace_auth_url, kind_of: String
+attribute :name, name_attribute: true,  kind_of: String, required: true
+attribute :instance, kind_of: String, required: true
 
 attr_accessor :exists
