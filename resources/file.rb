@@ -22,14 +22,14 @@ actions :create, :create_if_missing, :upload
 
 default_action :create
 
-attribute :rackspace_username, :kind_of => String, :required => true
-attribute :rackspace_api_key, :kind_of => String, :required => true
-attribute :rackspace_region, :kind_of => String, :default => "dfw"
-attribute :rackspace_auth_url, :kind_of => String
-attribute :filename, :kind_of => String, :name_attribute => true
-attribute :directory, :kind_of => String, :required => true
-attribute :cloudfile_uri, :kind_of => String
-attribute :binmode, :kind_of => [ TrueClass, FalseClass ], :default => false
+attribute :rackspace_username, kind_of: String, required: true
+attribute :rackspace_api_key, kind_of: String, required: true
+attribute :rackspace_region, kind_of: String, default: 'dfw'
+attribute :rackspace_auth_url, kind_of: String
+attribute :filename, kind_of: String, name_attribute: true
+attribute :directory, kind_of: String, required: true
+attribute :cloudfile_uri, kind_of: String
+attribute :binmode, kind_of: [TrueClass, FalseClass], default: false
 
 attr_accessor :exists
 attr_accessor :checksum

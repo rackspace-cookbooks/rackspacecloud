@@ -19,13 +19,13 @@
 actions :add_node, :remove_node
 default_action :add_node
 
-attribute :rackspace_username, :kind_of => String, :required => true
-attribute :rackspace_api_key, :kind_of => String, :required => true
-attribute :rackspace_region, :kind_of => String, :default => "dfw"
-attribute :rackspace_auth_url, :kind_of => String
-attribute :load_balancer_id, :name_attribute => true,  :kind_of => String, :required => true
-attribute :node_address, :kind_of => String, :required => true
-attribute :condition, :kind_of => String,  :default => "ENABLED", :required => true
-attribute :port, :kind_of => Integer, :default => 80, :required => true
+attribute :rackspace_username, kind_of: String, required: true
+attribute :rackspace_api_key, kind_of: String, required: true
+attribute :rackspace_region, kind_of: String, default: 'dfw'
+attribute :rackspace_auth_url, kind_of: String
+attribute :load_balancer_id, name_attribute: true,  kind_of: String, required: true
+attribute :node_address, kind_of: String, required: true
+attribute :condition, kind_of: String, default: 'ENABLED', required: true
+attribute :port, kind_of: Integer, default: 80, required: true
 
 attr_accessor :exists, :nodes, :lb, :node

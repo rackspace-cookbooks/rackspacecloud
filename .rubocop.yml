@@ -42,6 +42,9 @@ WordArray:
 UnusedBlockArgument:
   Enabled: false
 
+Documentation:
+  Enabled: false
+
 AllCops:
   Include:
     - '**/metadata.rb'

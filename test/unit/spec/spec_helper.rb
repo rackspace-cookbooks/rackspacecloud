@@ -6,7 +6,7 @@ require 'rspec/expectations'
   platform: 'ubuntu',
   version: '14.04'
   # log_level: error (default: warn)
-}
+}.freeze
 
 def stub_commands
   stub_command('which sudo').and_return('/usr/bin/sudo')

@@ -19,23 +19,25 @@
 require 'ostruct'
 include Opscode::Rackspace::Databases
 
+use_inline_resources if defined?(use_inline_resources)
+
 def whyrun_supported?
   true
 end
 
 def load_current_resource
   @current_resource = Chef::Resource::RackspacecloudDbaasDb.new(@new_resource.name)
-  db = get_db
-  unless db.nil? || db.empty?
-    @current_resource.exists = true
-    @current_resource.name = db['name']
-  else
+  db = retr_db
+  if db.nil? || db.empty?
     @current_resource.exists = false
     @current_resource
+  else
+    @current_resource.exists = true
+    @current_resource.name = db['name']
   end
 end
 
-def get_db
+def retr_db
   begin
     db = dbaas.list_databases(new_resource.instance).body['databases'].find do |db_current|
       db_current['name'] == new_resource.name

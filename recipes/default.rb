@@ -17,10 +17,10 @@
 # limitations under the License.
 #
 
-include_recipe 'xml::ruby' unless platform_family?("windows")
+include_recipe 'xml::ruby' unless platform_family?('windows')
 
-chef_gem "fog" do
-  version node[:rackspacecloud][:fog_version]
+chef_gem 'fog' do # ~FC009
+  version node['rackspacecloud']['fog_version']
   compile_time true if Chef::Resource::ChefGem.method_defined?(:compile_time)
   action :install
 end

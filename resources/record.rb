@@ -17,16 +17,15 @@
 # limitations under the License.
 #
 
-
 actions :add, :delete, :update
 default_action :add
 
-attribute :rackspace_username, :kind_of => String, :required => true
-attribute :rackspace_api_key, :kind_of => String, :required => true
-attribute :rackspace_region, :kind_of => String, :default => "dfw"
-attribute :rackspace_auth_url, :kind_of => String
-attribute :name, :name_attribute => true, :kind_of => String, :required => true
-attribute :record, :kind_of => String, :required => true
-attribute :value, :kind_of => String, :required => true
-attribute :type, :kind_of => String, :default => "A"
-attribute :ttl, :kind_of => Integer, :default => 300
+attribute :rackspace_username, kind_of: String, required: true
+attribute :rackspace_api_key, kind_of: String, required: true
+attribute :rackspace_region, kind_of: String, default: 'dfw'
+attribute :rackspace_auth_url, kind_of: String
+attribute :name, name_attribute: true, kind_of: String, required: true
+attribute :record, kind_of: String, required: true
+attribute :value, kind_of: String, required: true
+attribute :type, kind_of: String, default: 'A'
+attribute :ttl, kind_of: Integer, default: 300

@@ -18,80 +18,76 @@
 
 include Opscode::Rackspace::LoadBalancers
 
+use_inline_resources if defined?(use_inline_resources)
+
 def whyrun_supported?
   true
 end
 
 def load_current_resource
   @current_resource = Chef::Resource::RackspacecloudLbaas.new(@new_resource.name)
-  lb = get_lb
+  lb = retr_lb
   if lb
     @current_resource.lb = lb
-    @current_resource.nodes = get_nodes
-    @current_resource.node = get_node
+    @current_resource.nodes = retr_nodes
+    @current_resource.node = retr_node
   else
     @current_resource
   end
 end
 
 def check_node_exists
-  if @current_resource.lb && !@current_resource.nodes.empty?
-    @current_resource.nodes.map {|node| true if node.address == @new_resource.node_address}
-  end
+  @current_resource.nodes.map { |node| true if node.address == @new_resource.node_address } if @current_resource.lb && !@current_resource.nodes.empty? # ~FC019
 end
 
-def get_lb
+def retr_lb
   begin
     lb = lbaas.load_balancers.get(new_resource.load_balancer_id)
   rescue Fog::Rackspace::LoadBalancers::NotFound
-    raise "Load balancer ID specified does not exist, please create load balancer and provide a valid ID"
+    raise 'Load balancer ID specified does not exist, please create load balancer and provide a valid ID'
   end
   return lb
 end
 
-def get_node
+def retr_node
   if @current_resource.lb && !@current_resource.nodes.empty?
     if check_node_exists
-      node = @current_resource.nodes.map {|node| node.id if node.address == @new_resource.node_address}
-      return @current_resource.nodes.get(node[0])
+      node_result = @current_resource.nodes.map { |node| node.id if node.address == @new_resource.node_address } # ~FC019
+      return @current_resource.nodes.get(node_result[0])
     end
   end
 end
 
-def get_nodes
-  if @current_resource.lb
-    @current_resource.lb.nodes
-  end
+def retr_nodes
+  @current_resource.lb.nodes if @current_resource.lb
 end
 
 def remove_node(node_id)
-  begin
-    lbaas.delete_node(new_resource.load_balancer_id, node_id)
-  rescue Fog::Rackspace::LoadBalancers::NotFound
-    Chef::Log.info "Node does not belong to specified load balancer ID"
-  rescue Fog::Rackspace::LoadBalancers::ServiceError => err
-    Chef::Log.warn "An error occurred removing node from load balancer"
-    raise err # preserve unknown errors and pass them along
-  else
-    Chef::Log.info "Node has been removed from load balancer pool"
-  end
+  lbaas.delete_node(new_resource.load_balancer_id, node_id)
+rescue Fog::Rackspace::LoadBalancers::NotFound
+  Chef::Log.info 'Node does not belong to specified load balancer ID'
+rescue Fog::Rackspace::LoadBalancers::ServiceError => err
+  Chef::Log.warn 'An error occurred removing node from load balancer'
+  raise err # preserve unknown errors and pass them along
+else
+  Chef::Log.info 'Node has been removed from load balancer pool'
 end
 
 def add_node
   begin
-    #add the node
+    # add the node
     create_response = lbaas.create_node(new_resource.load_balancer_id, new_resource.node_address, new_resource.port, new_resource.condition)
   rescue Fog::Rackspace::LoadBalancers::ServiceError => err
-    Chef::Log.warn "An error occured making the create node request"
+    Chef::Log.warn "An error occured making the create node request #{create_response}"
     raise err # preserve unknown errors and pass them along
   end
-  Chef::Log.info "Node successfully added to cloud loadbalancer"
+  Chef::Log.info 'Node successfully added to cloud loadbalancer'
 end
 
-#add node to LB if it doesnt exist
+# add node to LB if it doesnt exist
 action :add_node do
   unless check_node_exists
-    converge_by("Adding node to cloud load balancer #{new_resource.load_balancer_id}" ) do
+    converge_by("Adding node to cloud load balancer #{new_resource.load_balancer_id}") do
       add_node
     end
   end
